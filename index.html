@@ -2,8 +2,15 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=5" />
 <meta name="theme-color" content="#0F8A3E" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="Unga Market" />
+<meta name="application-name" content="Unga Market" />
+<link rel="manifest" href="/manifest.json" />
+<link rel="apple-touch-icon" href="/logo.svg" />
 <title>Unga Market - Your Everyday, Our Priority! | Wholesale FMCG Direct Pricing</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,6 +23,8 @@
 <!-- Leaflet Real-Time Map Styles & Engine -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<!-- Client-side QRCode Generator for Mobile Quick-Open QR -->
+<script src="https://unpkg.com/qrcode@1.5.4/build/qrcode.min.js"></script>
 <style>
 :root{
   --green:#0F8A3E; --green-dark:#0A6B2E; --green-soft:#E8F6ED;
@@ -431,15 +440,137 @@ a{color:inherit;text-decoration:none}
   border-color: var(--green);
 }
 
+/* ==========================================================================
+   MOBILE BOTTOM NAVIGATION & TOUCH ERGONOMICS (Phone Browser Optimization)
+   ========================================================================== */
+.mobile-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: calc(60px + var(--safe-bottom));
+  padding-bottom: var(--safe-bottom);
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border-top: 1px solid var(--line);
+  display: none;
+  grid-template-columns: repeat(5, 1fr);
+  align-items: center;
+  z-index: 70;
+  box-shadow: 0 -4px 20px rgba(17, 24, 39, 0.08);
+}
+.nav-tab-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 4px 2px;
+  color: var(--ink-2);
+  font-size: 10.5px;
+  font-weight: 800;
+  transition: all 0.15s ease;
+  position: relative;
+  touch-action: manipulation;
+  user-select: none;
+}
+.nav-tab-btn svg {
+  width: 21px;
+  height: 21px;
+  margin-bottom: 2px;
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+.nav-tab-btn.active, .nav-tab-btn:active {
+  color: var(--green);
+}
+.nav-tab-btn.active svg {
+  transform: scale(1.12);
+  color: var(--green);
+}
+.nav-tab-badge {
+  position: absolute;
+  top: 4px;
+  right: 20%;
+  background: var(--orange);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 900;
+  padding: 1px 5px;
+  border-radius: 10px;
+  min-width: 16px;
+  text-align: center;
+  border: 1.5px solid #fff;
+  line-height: 1.2;
+}
+
+/* Mobile Quick Share / QR Sheet Styles */
+.mobile-qr-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px;
+  text-align: center;
+  border: 1px solid var(--line);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+.mobile-qr-wrap {
+  background: #ECFDF5;
+  border: 2px dashed #10B981;
+  border-radius: 16px;
+  padding: 12px;
+  display: inline-block;
+  margin: 10px 0;
+}
+.mobile-qr-wrap img {
+  width: 180px;
+  height: 180px;
+  margin: 0 auto;
+  border-radius: 8px;
+}
+
+@media(max-width:768px){
+  .mobile-bottom-nav {
+    display: grid;
+  }
+  body {
+    padding-bottom: calc(88px + var(--safe-bottom)) !important;
+  }
+  .fab {
+    bottom: calc(70px + var(--safe-bottom)) !important;
+  }
+  .toast-container {
+    bottom: calc(82px + var(--safe-bottom)) !important;
+  }
+  .modal {
+    padding: 8px;
+    align-items: flex-end; /* Bottom sheet experience on phone */
+  }
+  .modal-box {
+    width: 100% !important;
+    max-height: calc(100dvh - 20px);
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    margin-bottom: 0;
+  }
+}
+
 @media(max-width:640px){
-  .hero-inner{padding:16px;border-radius:16px}
-  .hero h1{font-size:19px}
+  input, select, textarea {
+    font-size: 16px !important; /* Prevents auto-zoom on iOS Safari */
+  }
+  .hero-inner{padding:14px;border-radius:16px}
+  .hero h1{font-size:18px}
   .hero-logo-art{display:none}
-  .grid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .grid{grid-template-columns:repeat(2,1fr);gap:8px}
+  .card{padding:8px;border-radius:12px}
   .card .name{font-size:12px}
-  .tl-step{width:52px}
-  .tl-lbl{font-size:9px}
+  .card .brand{font-size:10px}
+  .card .size{font-size:10px}
+  .tl-step{width:48px}
+  .tl-lbl{font-size:8.5px}
   .sales-kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .top-delivery-inner{flex-direction:column;align-items:flex-start;gap:6px}
+  .top-delivery-bar{padding:6px 12px}
 }
 </style>
 </head>
@@ -598,7 +729,8 @@ a{color:inherit;text-decoration:none}
           <button class="btn-address-header" onclick="openAddressModal()">📍 Add Delivery Address ➕</button>
         </div>
       </div>
-      <div style="display:flex;align-items:center;gap:8px">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <button class="toast-action-btn" onclick="openMobileShareModal()" style="background:rgba(255,255,255,.28);color:#fff;border:none;font-weight:900;display:inline-flex;align-items:center;gap:4px">📱 Open on Mobile</button>
         <button class="toast-action-btn" onclick="openPartnerLoginModal('shopowner')" style="background:rgba(255,255,255,.25);color:#fff;border:none;font-weight:900">🏪 Staff / Partner Login</button>
         <button class="toast-action-btn" onclick="openWhereIsMyOrder()" style="background:rgba(255,255,255,.2);color:#fff;border:none">📍 Where is my order?</button>
       </div>
@@ -804,6 +936,11 @@ a{color:inherit;text-decoration:none}
       <button class="close" onclick="closeModal('mAddress')">✕</button>
     </div>
     <div class="modal-body">
+      <!-- 1-Tap GPS Location Button -->
+      <button type="button" class="btn-ghost" onclick="useCurrentLocation()" style="width:100%;height:40px;margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:6px;background:#ECFDF5;border:1.5px solid #10B981;color:#065F46;font-size:12.5px;font-weight:900;border-radius:10px">
+        📍 1-Tap Auto Detect Current GPS Location
+      </button>
+
       <form onsubmit="handleSaveAddress(event)">
         <div style="font-size:12px;font-weight:900;color:var(--ink-2);margin-bottom:6px;text-transform:uppercase">Save Address As</div>
         <div style="display:flex;gap:6px;margin-bottom:12px">
@@ -1224,6 +1361,70 @@ a{color:inherit;text-decoration:none}
     </div>
   </div>
 </div>
+
+<!-- Open on Mobile Phone QR & Share Modal -->
+<div id="mMobileShare" class="modal" onclick="if(event.target===this)closeModal('mMobileShare')">
+  <div class="modal-box" style="max-width:440px;text-align:center">
+    <div class="modal-head">
+      <h3>📱 Open on Mobile Phone</h3>
+      <button class="close" onclick="closeModal('mMobileShare')">✕</button>
+    </div>
+    <div class="modal-body" style="padding:16px 20px">
+      <div style="font-size:13px;color:var(--ink-2);margin-bottom:8px">
+        Scan this QR code with your iPhone or Android camera to instantly open <b>Unga Market</b> on your mobile browser!
+      </div>
+      
+      <div class="mobile-qr-wrap">
+        <img id="mobileShareQrImg" alt="Scan to Open on Mobile" style="display:block;margin:0 auto;width:180px;height:180px" />
+      </div>
+
+      <div style="font-size:12px;font-weight:900;color:var(--green-dark);margin-bottom:12px;word-break:break-all" id="mobileShareUrlText">
+        Loading link...
+      </div>
+
+      <div style="display:flex;gap:8px;justify-content:center;margin-bottom:14px">
+        <button type="button" class="btn-primary" onclick="copyAppUrl()" style="flex:1;height:40px;font-size:12.5px;display:flex;align-items:center;justify-content:center;gap:6px">
+          📋 Copy Mobile Link
+        </button>
+        <button type="button" class="btn-ghost" onclick="shareAppUrl()" style="flex:1;height:40px;font-size:12.5px;margin-top:0;display:flex;align-items:center;justify-content:center;gap:6px;border:1.5px solid var(--green);color:var(--green-dark)">
+          📲 Share via App
+        </button>
+      </div>
+
+      <!-- PWA Installation / Home Screen Tips -->
+      <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:12px;text-align:left;font-size:11.5px;color:var(--ink-2)">
+        <div style="font-weight:900;color:var(--ink);margin-bottom:4px">💡 Install as App on your Phone:</div>
+        <div style="margin-bottom:4px">🤖 <b>Android (Chrome):</b> Tap <b>⋮ (Menu)</b> → Select <b>"Add to Home screen"</b> or <b>"Install app"</b>.</div>
+        <div>🍎 <b>iPhone (Safari):</b> Tap <b>Share icon (↑)</b> → Select <b>"Add to Home Screen"</b>.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Mobile Bottom Navigation Bar (Visible on mobile/tablet screens) -->
+<nav class="mobile-bottom-nav" id="mobileBottomNav" aria-label="Mobile Navigation">
+  <button type="button" class="nav-tab-btn active" id="tabHome" onclick="mobileNavGoHome()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <span>Store</span>
+  </button>
+  <button type="button" class="nav-tab-btn" id="tabCategories" onclick="toggleMobileCategories()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+    <span>Categories</span>
+  </button>
+  <button type="button" class="nav-tab-btn" id="tabCart" onclick="openCart()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+    <span class="nav-tab-badge" id="mobileCartBadge" style="display:none">0</span>
+    <span>Cart</span>
+  </button>
+  <button type="button" class="nav-tab-btn" id="tabOrders" onclick="openOrdersModal()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+    <span>Orders</span>
+  </button>
+  <button type="button" class="nav-tab-btn" id="tabMobileQr" onclick="openMobileShareModal()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>
+    <span>Mobile App</span>
+  </button>
+</nav>
 
 <!-- Toast Notification Container -->
 <div id="toastContainer" class="toast-container"></div>
@@ -2299,12 +2500,22 @@ window.cartCount = function(){
 window.renderCart = function(){
   const cnt = cartCount();
   const badge = document.getElementById('cartBadge');
-  badge.style.display = cnt ? '' : 'none';
-  badge.textContent = cnt;
+  if(badge){
+    badge.style.display = cnt ? '' : 'none';
+    badge.textContent = cnt;
+  }
+  
+  const mobileBadge = document.getElementById('mobileCartBadge');
+  if(mobileBadge){
+    mobileBadge.style.display = cnt ? '' : 'none';
+    mobileBadge.textContent = cnt;
+  }
   
   const fab = document.getElementById('fab');
-  document.getElementById('fabCount').textContent = cnt + (cnt === 1 ? ' item' : ' items');
-  fab.classList.toggle('show', cnt > 0);
+  if(fab){
+    document.getElementById('fabCount').textContent = cnt + (cnt === 1 ? ' item' : ' items');
+    fab.classList.toggle('show', cnt > 0);
+  }
 
   const body = document.getElementById('cartBody');
   const foot = document.getElementById('cartFoot');
@@ -3701,6 +3912,119 @@ window.toast = function(m, type){
     type: type === 'ok' ? 'ok' : type === 'err' ? 'err' : 'status-pending',
     duration: 3000
   });
+};
+
+/* ==========================================================================
+   MOBILE BROWSER UTILITIES & PWA SHARE ENGINE
+   ========================================================================== */
+window.openMobileShareModal = async function(){
+  const url = window.location.href;
+  const urlTextEl = document.getElementById('mobileShareUrlText');
+  const imgEl = document.getElementById('mobileShareQrImg');
+  if(urlTextEl) urlTextEl.textContent = url;
+  
+  if(imgEl && window.QRCode){
+    try {
+      const qrDataUrl = await QRCode.toDataURL(url, {
+        errorCorrectionLevel: 'M',
+        type: 'image/png',
+        margin: 2,
+        width: 240,
+        color: { dark: '#0A6B2E', light: '#FFFFFF' }
+      });
+      imgEl.src = qrDataUrl;
+    } catch(e){
+      console.warn('Mobile QR generation error:', e);
+      imgEl.src = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(url)}&color=0A6B2E`;
+    }
+  } else if(imgEl){
+    imgEl.src = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(url)}&color=0A6B2E`;
+  }
+  openModal('mMobileShare');
+};
+
+window.copyAppUrl = function(){
+  const url = window.location.href;
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(url).then(() => {
+      toast('App link copied to clipboard! 📋', 'ok');
+    }).catch(() => {
+      toast('Link: ' + url, 'ok');
+    });
+  } else {
+    toast('Link: ' + url, 'ok');
+  }
+};
+
+window.shareAppUrl = async function(){
+  const shareData = {
+    title: 'Unga Market - Wholesale FMCG Direct Pricing',
+    text: 'Shop grocery & FMCG essentials at direct wholesale prices with 10–15 mins delivery on Unga Market!',
+    url: window.location.href
+  };
+  if(navigator.share){
+    try {
+      await navigator.share(shareData);
+      toast('Shared successfully! 📲', 'ok');
+    } catch(err){
+      if(err.name !== 'AbortError'){
+        copyAppUrl();
+      }
+    }
+  } else {
+    copyAppUrl();
+  }
+};
+
+window.mobileNavGoHome = function(){
+  document.querySelectorAll('.nav-tab-btn').forEach(btn => btn.classList.remove('active'));
+  document.getElementById('tabHome')?.classList.add('active');
+  goHome();
+};
+
+window.toggleMobileCategories = function(){
+  const chipsWrap = document.getElementById('chipsWrap');
+  if(chipsWrap){
+    chipsWrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    const searchInput = document.getElementById('q');
+    if(searchInput) searchInput.focus();
+    toast('Select a wholesale category or search above 🛍️', 'ok');
+  }
+};
+
+window.useCurrentLocation = function(){
+  if(!navigator.geolocation){
+    toast('Geolocation not supported by this browser. Please type address.', 'err');
+    return;
+  }
+  toast('Detecting GPS location... 📍', 'ok');
+  navigator.geolocation.getCurrentPosition(async (pos) => {
+    const lat = pos.coords.latitude;
+    const lng = pos.coords.longitude;
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+      const data = await res.json();
+      if(data && data.address){
+        const addr = data.address;
+        const road = addr.road || addr.suburb || addr.neighbourhood || 'Near Main Rd';
+        const suburb = addr.suburb || addr.city_district || addr.city || 'Chennai';
+        const postcode = addr.postcode || '600042';
+        if(document.getElementById('addrStreet')) document.getElementById('addrStreet').value = road;
+        if(document.getElementById('addrArea')) document.getElementById('addrArea').value = `${suburb}, Chennai`;
+        if(document.getElementById('addrPin')) document.getElementById('addrPin').value = postcode;
+        toast('GPS location detected & address autofilled! 📍', 'ok');
+      } else {
+        throw new Error('No address found');
+      }
+    } catch(e){
+      if(document.getElementById('addrArea')) document.getElementById('addrArea').value = `GPS (${lat.toFixed(4)}, ${lng.toFixed(4)}), Chennai`;
+      if(document.getElementById('addrPin')) document.getElementById('addrPin').value = '600042';
+      toast('GPS coordinates captured! 📍', 'ok');
+    }
+  }, (err) => {
+    console.warn('Geolocation error:', err);
+    toast('Location permission denied or unavailable. Please type address.', 'err');
+  }, { enableHighAccuracy: true, timeout: 8000 });
 };
 
 // Automatic polling interval to sync live order status across portals (Customer, Shop Owner, Delivery)
