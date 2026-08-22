@@ -43,7 +43,7 @@ export const DeliveryPartnerPortal: React.FC<DeliveryPartnerPortalProps> = ({
       // Hub Marker (Velachery Main Hub)
       const hubIcon = L.divIcon({
         className: 'custom-hub-marker',
-        html: '<div style="background:#0F8A3E;color:#fff;font-weight:900;font-size:11px;padding:4px 8px;border-radius:12px;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.3);white-space:nowrap">🏪 Wholesale Hub</div>',
+        html: '<div style="background:#0F8A3E;color:#fff;font-weight:900;font-size:11px;padding:4px 8px;border-radius:12px;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.3);white-space:nowrap">🏪 Hub</div>',
         iconSize: [110, 30]
       });
       L.marker([12.9815, 80.2180], { icon: hubIcon }).addTo(map);
@@ -132,7 +132,7 @@ export const DeliveryPartnerPortal: React.FC<DeliveryPartnerPortalProps> = ({
               <div className="text-3xl mb-2">🎉</div>
               <h4 className="font-extrabold text-slate-800 text-sm">All deliveries completed!</h4>
               <p className="text-xs text-slate-500 mt-1">
-                New wholesale orders from customers will appear here automatically.
+                New orders from customers will appear here automatically.
               </p>
             </div>
           ) : (

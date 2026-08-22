@@ -72,7 +72,7 @@ export const AiRecipeModal: React.FC<AiRecipeModalProps> = ({
 
         setResult({
           title: data.recipe.dish || query,
-          description: data.recipe.summary || 'Ingredients calculated with wholesale savings',
+          description: data.recipe.summary || 'Ingredients calculated with savings',
           steps: data.recipe.instructions || data.recipe.steps || [],
           items: matchedItems
         });
@@ -81,9 +81,9 @@ export const AiRecipeModal: React.FC<AiRecipeModalProps> = ({
         const sampleMatches = products.slice(0, 3).map((p) => ({ product: p, qty: 1 }));
         setResult({
           title: query,
-          description: 'Chef recipe ingredients with flat 20% wholesale discount',
+          description: 'Chef recipe ingredients with flat 20% discount',
           steps: [
-            'Prepare all spices and authentic FMCG wholesale ingredients.',
+            'Prepare all spices and authentic ingredients.',
             'Follow traditional culinary proportions for best aroma.',
             'Serve fresh and hot.'
           ],
@@ -95,7 +95,7 @@ export const AiRecipeModal: React.FC<AiRecipeModalProps> = ({
       const sampleMatches = products.slice(0, 3).map((p) => ({ product: p, qty: 1 }));
       setResult({
         title: query,
-        description: 'Chef recipe ingredients with flat 20% wholesale discount',
+        description: 'Chef recipe ingredients with flat 20% discount',
         steps: ['Combine ingredients and cook to perfection.'],
         items: sampleMatches
       });
@@ -121,7 +121,7 @@ export const AiRecipeModal: React.FC<AiRecipeModalProps> = ({
             <div>
               <h3 className="font-black text-base text-white">Gemini AI Recipe-to-Cart</h3>
               <p className="text-[11px] text-white/90 font-semibold">
-                Enter any dish → Auto-detects &amp; adds wholesale ingredients
+                Enter any dish → Auto-detects &amp; adds ingredients
               </p>
             </div>
           </div>
@@ -185,10 +185,10 @@ export const AiRecipeModal: React.FC<AiRecipeModalProps> = ({
                 <p className="text-xs text-slate-500 font-medium">{result.description}</p>
               </div>
 
-              {/* Detected Ingredients in Wholesale Store */}
+              {/* Detected Ingredients in Store */}
               <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 space-y-2">
                 <div className="font-extrabold text-xs text-slate-700 uppercase tracking-wider flex items-center justify-between">
-                  <span>Matching Wholesale Ingredients ({result.items?.length || 0})</span>
+                  <span>Matching Ingredients ({result.items?.length || 0})</span>
                   <span className="text-emerald-700 font-black text-xs">Flat 20% Off</span>
                 </div>
 
@@ -219,7 +219,7 @@ export const AiRecipeModal: React.FC<AiRecipeModalProps> = ({
                 className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3 rounded-xl shadow-md transition-all text-xs flex items-center justify-center gap-2 cursor-pointer"
               >
                 <ShoppingBag size={15} />
-                <span>Add All Ingredients to Wholesale Cart ✓</span>
+                <span>Add All Ingredients to Cart ✓</span>
               </button>
             </div>
           )}

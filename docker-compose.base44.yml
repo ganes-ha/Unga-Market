@@ -1,0 +1,16 @@
+services:
+  app:
+    image: node:22-slim
+    working_dir: /app
+    volumes:
+      - ./:/app
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3001
+      - API_PROXY_TARGET=http://127.0.0.1:3001
+    env_file:
+      - ./.env.base44-defaults
+      - /run/base44/app.env
+    command: sh -c "npm install && (node --watch server.js &) && npx vite --host 0.0.0.0 --port 3000"
+    restart: unless-stopped

@@ -142,7 +142,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         <div className="bg-slate-50 border-b border-slate-200 px-5 py-4 flex items-center justify-between">
           <div>
             <h3 className="font-black text-slate-900 text-lg">Delivery & Payment</h3>
-            <p className="text-xs text-slate-500 font-medium">10–15 Mins Express Wholesale Delivery</p>
+            <p className="text-xs text-slate-500 font-medium">10–15 Mins Express Delivery</p>
           </div>
           <button
             onClick={onClose}
@@ -338,7 +338,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                     💵 Cash on Delivery (COD)
                   </div>
                   <div className="text-[11px] text-slate-500 font-medium">
-                    Pay invoice cash to wholesale delivery agent upon physical handover
+                    Pay invoice cash to delivery agent upon physical handover
                   </div>
                 </div>
               </label>
@@ -348,7 +348,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
           {/* Summary Box */}
           <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 flex items-center justify-between text-xs">
             <div>
-              <span className="text-slate-500 font-bold">Total Wholesale Net Amount:</span>
+              <span className="text-slate-500 font-bold">Total Amount:</span>
               <div className="text-[11px] text-slate-400">{cart.reduce((s, i) => s + i.qty, 0)} items</div>
             </div>
             <div className="text-right">

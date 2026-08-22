@@ -117,7 +117,7 @@ export const VoiceModal: React.FC<VoiceModalProps> = ({
 
         <div className="space-y-1">
           <h4 className="font-extrabold text-sm text-slate-800">
-            {transcriptText ? `"${transcriptText}"` : 'Listening for FMCG items...'}
+            {transcriptText ? `"${transcriptText}"` : 'Listening for items...'}
           </h4>
           <p className="text-xs text-slate-500">{statusMsg}</p>
         </div>

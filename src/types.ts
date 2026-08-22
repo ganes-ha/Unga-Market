@@ -5,8 +5,8 @@ export interface Product {
   n: string;       // product name
   s: string;       // pack size / unit
   m: number;       // MRP in INR
-  disc: number;    // Wholesale Discount amount
-  p: number;       // Wholesale Price in INR
+  disc: number;    // Discount amount
+  p: number;       // Price in INR
   img: string;     // Product image URL or fallback SVG
   bulkMin?: number;
   bulkDisc?: number;

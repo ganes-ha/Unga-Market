@@ -1,0 +1,12 @@
+{
+  "previewPort": 3000,
+  "healthPath": "/",
+  "startCommand": "docker compose -f docker-compose.base44.yml up -d",
+  "secrets": [
+    {
+      "name": "GEMINI_API_KEY",
+      "description": "Google Gemini API key for AI product image generation. Optional — the app falls back to vector packshot SVGs without it. Get one at https://aistudio.google.com/apikey",
+      "requiredAtBoot": false
+    }
+  ]
+}

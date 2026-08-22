@@ -11,7 +11,7 @@ import { ShopOwnerPortal } from './components/ShopOwnerPortal';
 import { DeliveryPartnerPortal } from './components/DeliveryPartnerPortal';
 import { AiRecipeModal } from './components/AiRecipeModal';
 import { VoiceModal } from './components/VoiceModal';
-import { MobileShareModal } from './components/MobileShareModal';
+
 import { TrackOrderModal } from './components/TrackOrderModal';
 import confetti from 'canvas-confetti';
 import { Sparkles, ShoppingBag, Truck, Store, Filter, Tag, CheckCircle2, ChevronRight, X } from 'lucide-react';
@@ -70,7 +70,7 @@ export function App() {
     bankName: 'HDFC Bank / Axis Bank',
     accountNumber: '50200012345678',
     ifscCode: 'HDFC0001234',
-    instructions: 'Direct wholesale remittance to shop owner'
+    instructions: 'Direct remittance to shop owner'
   });
 
   // Modal Open States
@@ -79,7 +79,6 @@ export function App() {
   const [isUpiPayOpen, setIsUpiPayOpen] = useState(false);
   const [isAiRecipeOpen, setIsAiRecipeOpen] = useState(false);
   const [isVoiceOpen, setIsVoiceOpen] = useState(false);
-  const [isMobileShareOpen, setIsMobileShareOpen] = useState(false);
   const [isCategoriesDrawerOpen, setIsCategoriesDrawerOpen] = useState(false);
 
   // Notification Toast
@@ -145,7 +144,7 @@ export function App() {
       const idx = prev.findIndex((i) => i.product.id === product.id);
       if (idx === -1) {
         if (delta > 0) {
-          showToast(`Added 1x ${product.n} to wholesale cart ✓`);
+          showToast(`Added 1x ${product.n} to cart ✓`);
           return [...prev, { product, qty: delta }];
         }
         return prev;
@@ -174,7 +173,7 @@ export function App() {
       });
       return next;
     });
-    showToast(`Added ${items.length} AI recipe ingredients to wholesale cart! ✓`);
+    showToast(`Added ${items.length} AI recipe ingredients to cart! ✓`);
     setIsCartOpen(true);
   };
 
@@ -354,7 +353,6 @@ export function App() {
         onOpenCart={() => setIsCartOpen(true)}
         onOpenAiRecipe={() => setIsAiRecipeOpen(true)}
         onOpenVoice={() => setIsVoiceOpen(true)}
-        onOpenMobileShare={() => setIsMobileShareOpen(true)}
         activeTab={activeTab}
         onChangeTab={setActiveTab}
         currentUser={currentUser}
@@ -374,13 +372,13 @@ export function App() {
               <div className="space-y-1.5 text-center md:text-left">
                 <div className="inline-flex items-center gap-1.5 bg-emerald-600/60 border border-emerald-400/30 text-emerald-100 text-[11px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider">
                   <Sparkles size={12} />
-                  <span>Direct Distributor Wholesale</span>
+                  <span>Direct Distributor</span>
                 </div>
                 <h1 className="text-xl sm:text-2xl font-black tracking-tight text-white">
-                  Chennai's Wholesale FMCG Grocery Hub
+                  Chennai's Grocery Hub
                 </h1>
                 <p className="text-xs sm:text-sm text-emerald-100/90 max-w-xl font-medium">
-                  Flat 20% discount on Tata Tea, Maggi, Fortune Oil, Aashirvaad, Surf Excel &amp; 1,600+ FMCG brands. Free 10–15 min express doorstep delivery.
+                  Flat 20% discount on Tata Tea, Maggi, Fortune Oil, Aashirvaad, Surf Excel &amp; 1,600+ brands. Free 10–15 min express doorstep delivery.
                 </p>
               </div>
 
@@ -392,13 +390,6 @@ export function App() {
                 >
                   <Sparkles size={15} />
                   <span>AI Recipe-to-Cart</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsMobileShareOpen(true)}
-                  className="bg-white/10 hover:bg-white/20 text-white font-extrabold text-xs px-3.5 py-2.5 rounded-xl border border-white/20 transition-all cursor-pointer"
-                >
-                  📱 Share / Mobile
                 </button>
               </div>
             </div>
@@ -444,7 +435,7 @@ export function App() {
 
               <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
                 <div className="text-slate-500 font-bold text-[11px]">
-                  Showing <b>{filteredProducts.length}</b> wholesale products
+                  Showing <b>{filteredProducts.length}</b> products
                 </div>
 
                 <div className="flex items-center gap-1.5">
@@ -467,9 +458,9 @@ export function App() {
             {filteredProducts.length === 0 ? (
               <div className="bg-white rounded-3xl p-12 text-center border border-slate-200 space-y-3">
                 <div className="text-4xl">🔍</div>
-                <h3 className="font-extrabold text-slate-800 text-base">No wholesale items match your search</h3>
+                <h3 className="font-extrabold text-slate-800 text-base">No items match your search</h3>
                 <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                  Try checking spelling or reset category filters to view our full 1,600+ FMCG catalog.
+                  Try checking spelling or reset category filters to view our full 1,600+ catalog.
                 </p>
                 <button
                   type="button"
@@ -529,7 +520,6 @@ export function App() {
         cartCount={cartCount}
         cartTotal={cartTotal}
         onOpenCart={() => setIsCartOpen(true)}
-        onOpenMobileShare={() => setIsMobileShareOpen(true)}
         onOpenCategories={() => setIsCategoriesDrawerOpen(true)}
       />
 
@@ -588,12 +578,6 @@ export function App() {
         isOpen={isVoiceOpen}
         onClose={() => setIsVoiceOpen(false)}
         onTranscript={(q) => setSearchQuery(q)}
-      />
-
-      {/* Mobile Testing & Share Modal */}
-      <MobileShareModal
-        isOpen={isMobileShareOpen}
-        onClose={() => setIsMobileShareOpen(false)}
       />
 
       {/* Track Order Modal */}
