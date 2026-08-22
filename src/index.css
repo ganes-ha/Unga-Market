@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --green: #0F8A3E;
+    --green-dark: #0A6B2E;
+    --green-soft: #E8F6ED;
+    --orange: #F26522;
+    --orange-dark: #D9531A;
+    --orange-soft: #FFF1E7;
+    --ink: #111827;
+    --ink-2: #4B5563;
+    --ink-3: #9CA3AF;
+    --bg-page: #F8FAFC;
+    --bg-card: #FFFFFF;
+    --border: #E2E8F0;
+  }
+
+  body {
+    background-color: var(--bg-page);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+  }
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F1F5F9;
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* Safe area insets for notched mobile displays */
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 16px);
+}

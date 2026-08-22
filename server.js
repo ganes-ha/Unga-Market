@@ -4,6 +4,7 @@ import cors from 'cors';
 import { fileURLToPath } from 'url';
 import QRCode from 'qrcode';
 import { GoogleGenAI } from '@google/genai';
+import { PRODUCTS } from './products.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -296,6 +297,15 @@ app.get('/api/config', (req, res) => {
     upiVpa: shopOwnerPaymentSettings.upiVpa,
     upiPayeeName: shopOwnerPaymentSettings.payeeName,
     paymentSettings: shopOwnerPaymentSettings
+  });
+});
+
+// Full FMCG Products Catalog API
+app.get('/api/products', (req, res) => {
+  res.json({
+    success: true,
+    count: PRODUCTS.length,
+    products: PRODUCTS
   });
 });
 
@@ -927,12 +937,21 @@ app.get('/api/stats', (req, res) => {
   res.json({ success: true, stats: counts });
 });
 
-// Serve static assets from root directory
+// Serve static assets from dist directory if built, otherwise from root directory
+const distPath = path.join(__dirname, 'dist');
+app.use(express.static(distPath));
 app.use(express.static(__dirname));
 
-// Fallback to index.html for any route
+// Fallback to index.html for any SPA route
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
+  const distIndex = path.join(distPath, 'index.html');
+  if (path.resolve(distIndex)) {
+    res.sendFile(distIndex, (err) => {
+      if (err) res.sendFile(path.join(__dirname, 'index.html'));
+    });
+  } else {
+    res.sendFile(path.join(__dirname, 'index.html'));
+  }
 });
 
 app.listen(PORT, HOST, () => {
