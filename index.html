@@ -1032,13 +1032,13 @@ a{color:inherit;text-decoration:none}
 
         <div class="field">
           <label>Primary UPI ID / VPA (e.g. yourname@okaxis, yourstore@icici)</label>
-          <input id="setUpiVpa" required placeholder="e.g. 9840123456@okaxis or ungamarket@okaxis" />
+          <input id="setUpiVpa" required oninput="updateSettingsQrPreview()" placeholder="e.g. jay.pratap.madhavan@okaxis" />
           <small style="font-size:11px;color:var(--ink-3);display:block;margin-top:3px">Used for universal NPCI QR code scanning across Google Pay, PhonePe, Paytm &amp; BHIM</small>
         </div>
 
         <div class="field">
           <label>Payee / Business Registered Name</label>
-          <input id="setPayeeName" required placeholder="e.g. Unga Market Wholesale Hub" />
+          <input id="setPayeeName" required oninput="updateSettingsQrPreview()" placeholder="e.g. Jay Prathap" />
         </div>
 
         <div style="display:flex;gap:10px">
@@ -1282,38 +1282,55 @@ a{color:inherit;text-decoration:none}
 
 <!-- UPI / GPay Dynamic QR Modal -->
 <div id="mUpiPay" class="modal" onclick="if(event.target===this)closeModal('mUpiPay')">
-  <div class="modal-box" style="max-width:440px;text-align:center">
-    <div class="modal-head">
-      <h3 id="payModalHeading">⚡ Instant Payment</h3>
-      <button class="close" onclick="closeModal('mUpiPay')">✕</button>
+  <div class="modal-box" style="max-width:440px;text-align:center;padding:0;overflow:hidden">
+    <div class="modal-head" style="background:#0F8A3E;color:#fff;border-bottom:none">
+      <h3 id="payModalHeading" style="color:#fff">⚡ Instant UPI / Google Pay</h3>
+      <button class="close" style="color:#fff" onclick="closeModal('mUpiPay')">✕</button>
     </div>
-    <div class="modal-body" style="padding:16px 20px">
-      <div id="payModalSubtext" style="font-size:12.5px;color:var(--ink-2);margin-bottom:6px">Scan QR code using Google Pay, PhonePe, or any UPI app</div>
-      
-      <div id="upiQrWrap" style="background:#fff;padding:10px;border:2px dashed var(--green);border-radius:16px;display:inline-block;margin:4px 0">
-        <img id="upiQrImg" style="width:190px;height:190px;margin:0 auto;display:block" alt="UPI QR Code"/>
-      </div>
-      
-      <div style="margin:6px 0;font-size:22px;font-weight:900;color:var(--green-dark)" id="upiPayAmount">₹0.00</div>
-
-      <!-- Quick Copy UPI VPA Box -->
-      <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:8px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px">
-        <div style="text-align:left;overflow:hidden">
-          <div style="font-size:10px;font-weight:800;color:var(--ink-3);text-transform:uppercase">Direct Payee UPI ID</div>
-          <b style="font-size:13px;color:var(--ink);display:block;white-space:nowrap;text-overflow:ellipsis;overflow:hidden" id="upiVpaText">ungamarket@okaxis</b>
+    
+    <div class="modal-body" style="padding:16px 20px;background:#F0F4F8">
+      <!-- Google Pay QR Card matching official App look -->
+      <div style="background:#fff;border-radius:20px;padding:16px 14px;box-shadow:0 8px 30px rgba(0,0,0,0.08);border:1px solid #E2E8F0;margin-bottom:12px">
+        <!-- Payee Header with Dark Avatar Circle -->
+        <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:12px">
+          <div style="width:34px;height:34px;border-radius:50%;background:#374151;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px" id="upiPayeeAvatar">J</div>
+          <div style="font-size:17px;font-weight:900;color:#1F2937" id="upiPayeeHeading">Jay Prathap</div>
         </div>
-        <button type="button" class="coupon-chip" onclick="copyUpiVpa()" style="background:#fff;padding:4px 10px;font-size:11px;font-weight:900;flex-shrink:0">📋 Copy UPI ID</button>
+
+        <!-- QR Display with GPay center badge overlay -->
+        <div id="upiQrWrap" style="position:relative;display:inline-block;padding:8px;background:#fff;border-radius:16px;border:1px solid #E5E7EB">
+          <img id="upiQrImg" src="/upi_qr.png" style="width:210px;height:210px;margin:0 auto;display:block;border-radius:8px" alt="UPI QR Code"/>
+          <!-- GPay Center Emblem Overlay -->
+          <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:40px;height:40px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.15);border:1px solid #E5E7EB;pointer-events:none">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <path d="M22.5 12.27c0-.79-.07-1.54-.19-2.27H12v4.51h5.9c-.25 1.36-.99 2.51-2.11 3.28v2.73h3.41c1.99-1.84 3.3-4.55 3.3-8.25z" fill="#4285F4"/>
+              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.41-2.73c-.99.66-2.25 1.05-3.87 1.05-2.98 0-5.5-2.01-6.4-4.71H2.07v2.82C3.88 20.35 7.68 23 12 23z" fill="#34A853"/>
+              <path d="M5.6 13.95c-.23-.66-.36-1.37-.36-2.1s.13-1.44.36-2.1V6.93H2.07C1.3 8.46.86 10.18.86 12s.44 3.54 1.21 5.07l3.53-2.72v-.4z" fill="#FBBC05"/>
+              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.68 1 3.88 3.65 2.07 7.28l3.53 2.72c.9-2.7 3.42-4.62 6.4-4.62z" fill="#EA4335"/>
+            </svg>
+          </div>
+        </div>
+
+        <div style="font-size:12.5px;color:#374151;margin-top:10px;font-weight:700">
+          UPI ID: <span id="upiVpaText" style="color:#111827;font-weight:900;cursor:pointer" onclick="copyUpiVpa()" title="Click to Copy">jay.pratap.madhavan@okaxis</span> 📋
+        </div>
+        <div style="font-size:11px;color:#6B7280;margin-top:4px" id="payModalSubtext">Scan to pay with any UPI app</div>
       </div>
 
-      <!-- Direct GPay / PhonePe Mobile Numbers Box (For direct transfer without scanning) -->
-      <div id="directNumbersBox" style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:8px 12px;margin-bottom:12px;text-align:left;font-size:12px">
+      <!-- Amount Badge -->
+      <div style="background:#ECFDF5;border:1.5px solid #10B981;border-radius:12px;padding:8px 12px;display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <span style="font-size:12px;font-weight:800;color:#065F46">Amount to Pay:</span>
+        <b style="font-size:20px;font-weight:900;color:#047857" id="upiPayAmount">₹0.00</b>
+      </div>
+
+      <!-- Direct GPay / PhonePe Mobile Numbers Box -->
+      <div id="directNumbersBox" style="background:#fff;border:1px solid #BFDBFE;border-radius:10px;padding:8px 12px;margin-bottom:10px;text-align:left;font-size:12px">
         <div style="font-weight:900;color:#1E40AF;margin-bottom:4px;display:flex;justify-content:space-between">
-          <span>📱 Pay via GPay / PhonePe Mobile:</span>
-          <span style="font-size:10px;background:#DBEAFE;color:#1E40AF;padding:1px 6px;border-radius:6px">Direct Transfer</span>
+          <span>📱 Direct Mobile Number Transfer:</span>
+          <button type="button" onclick="copyDirectPhone()" style="background:#EFF6FF;border:1px solid #93C5FD;color:#1D4ED8;font-size:10.5px;font-weight:900;border-radius:6px;padding:2px 8px;cursor:pointer">📋 Copy No.</button>
         </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:2px">
-          <span>GPay / PhonePe Number: <b style="color:#111827" id="directPayPhoneText">9840123456</b></span>
-          <button type="button" onclick="copyDirectPhone()" style="background:#fff;border:1px solid #93C5FD;color:#1D4ED8;font-size:11px;font-weight:800;border-radius:6px;padding:2px 8px;cursor:pointer">Copy Number</button>
+        <div style="font-size:12.5px;font-weight:800;color:#111827">
+          GPay / PhonePe: <span id="directPayPhoneText">9840123456</span>
         </div>
       </div>
       
@@ -1324,11 +1341,11 @@ a{color:inherit;text-decoration:none}
         <a id="btnPaytm" class="btn-ghost" style="flex:1;font-size:11.5px;padding:4px;height:36px;margin-top:0" target="_blank">Open UPI</a>
       </div>
 
-      <div class="field" style="text-align:left;margin-top:6px">
-        <label>UPI Reference / UTR Number (Optional)</label>
-        <input id="upiUtr" placeholder="Enter 12-digit UTR from payment app" />
+      <div class="field" style="text-align:left;margin-top:4px">
+        <label style="font-size:11px">UPI Reference / UTR Number (Optional)</label>
+        <input id="upiUtr" placeholder="Enter 12-digit UTR from payment app" style="height:38px;font-size:13px" />
       </div>
-      <button class="btn-primary" onclick="confirmUpiPayment()">I Have Paid ✓</button>
+      <button class="btn-primary" onclick="confirmUpiPayment()" style="width:100%;height:44px;font-size:14px;font-weight:900">I Have Completed Payment ✓</button>
     </div>
   </div>
 </div>
@@ -2782,39 +2799,74 @@ window.handleCheckoutSubmit = async function(e){
   };
 
   if(G.selectedPay === 'gpay' || G.selectedPay === 'upi'){
+    const defaultVpa = (G.config?.upiVpa) || 'jay.pratap.madhavan@okaxis';
+    const defaultName = (G.config?.upiPayeeName) || 'Jay Prathap';
+    const defaultPhone = (G.config?.paymentSettings?.gpayPhone) || '9840123456';
+    const formattedAmount = total.toFixed(2);
+    const cleanNote = `Order ${orderId} Unga Market`;
+    const universalUpiUri = `upi://pay?pa=${encodeURIComponent(defaultVpa)}&pn=${encodeURIComponent(defaultName)}&am=${formattedAmount}&cu=INR&tn=${encodeURIComponent(cleanNote)}`;
+
+    // Set initial values in modal immediately for zero-delay UX
+    if(document.getElementById('upiPayAmount')) document.getElementById('upiPayAmount').textContent = `₹${formattedAmount}`;
+    if(document.getElementById('upiVpaText')) document.getElementById('upiVpaText').textContent = defaultVpa;
+    if(document.getElementById('upiPayeeHeading')) document.getElementById('upiPayeeHeading').textContent = defaultName;
+    if(document.getElementById('upiPayeeAvatar')) document.getElementById('upiPayeeAvatar').textContent = defaultName.charAt(0).toUpperCase() || 'J';
+    if(document.getElementById('directPayPhoneText')) document.getElementById('directPayPhoneText').textContent = defaultPhone;
+    if(document.getElementById('btnGpay')) document.getElementById('btnGpay').href = universalUpiUri;
+    if(document.getElementById('btnPhonepe')) document.getElementById('btnPhonepe').href = universalUpiUri;
+    if(document.getElementById('btnPaytm')) document.getElementById('btnPaytm').href = universalUpiUri;
+
+    // Show modal immediately
+    closeModal('mCheckout');
+    openModal('mUpiPay');
+
     try {
-      toast('Generating dynamic payment QR...', 'ok');
+      // Tier 1: Generate dynamic QR with exact order amount from backend
       const res = await fetch('/api/create-upi-qr', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: total, orderId, note: `Order ${orderId} Unga Market` })
+        body: JSON.stringify({ amount: total, orderId, note: cleanNote })
       });
       const data = await res.json();
-      if(data.success){
-        if(G.selectedPay === 'gpay'){
-          document.getElementById('payModalHeading').textContent = '🟢 Google Pay Instant Payment';
-          document.getElementById('payModalSubtext').textContent = 'Direct wholesale remittance to Shop Owner';
-        } else {
-          document.getElementById('payModalHeading').textContent = '⚡ Instant UPI Payment';
-          document.getElementById('payModalSubtext').textContent = 'Scan QR code with GPay, PhonePe, Paytm, or BHIM';
+      
+      if(data.success && (data.qrDataUrl || data.staticQrDataUrl)){
+        document.getElementById('upiQrImg').src = data.qrDataUrl || data.staticQrDataUrl;
+        if(data.upiVpa) document.getElementById('upiVpaText').textContent = data.upiVpa;
+        if(data.payeeName){
+          document.getElementById('upiPayeeHeading').textContent = data.payeeName;
+          document.getElementById('upiPayeeAvatar').textContent = data.payeeName.charAt(0).toUpperCase() || 'J';
         }
-        document.getElementById('upiQrImg').src = data.qrDataUrl;
-        document.getElementById('upiPayAmount').textContent = `₹${total.toFixed(2)}`;
-        document.getElementById('upiVpaText').textContent = data.upiVpa;
-        if(document.getElementById('directPayPhoneText')){
-          document.getElementById('directPayPhoneText').textContent = data.gpayPhone || data.phonepeNumber || '9840123456';
+        if(data.gpayPhone || data.phonepeNumber){
+          document.getElementById('directPayPhoneText').textContent = data.gpayPhone || data.phonepeNumber;
         }
-        document.getElementById('btnGpay').href = data.intents.gpay;
-        document.getElementById('btnPhonepe').href = data.intents.phonepe;
-        document.getElementById('btnPaytm').href = data.intents.universal || data.intents.paytm;
-        closeModal('mCheckout');
-        openModal('mUpiPay');
+        if(data.intents?.gpay) document.getElementById('btnGpay').href = data.intents.gpay;
+        if(data.intents?.phonepe) document.getElementById('btnPhonepe').href = data.intents.phonepe;
+        if(data.intents?.universal) document.getElementById('btnPaytm').href = data.intents.universal;
       } else {
-        toast('Could not generate UPI QR', 'err');
+        throw new Error('Backend QR generation returned non-success');
       }
     } catch(err) {
-      console.error(err);
-      toast('Payment gateway error. Please retry.', 'err');
+      console.warn('Backend QR fetch failed, using client-side QR generation engine:', err);
+      // Tier 2: Generate dynamic QR code in browser client
+      if(window.QRCode && window.QRCode.toDataURL){
+        try {
+          const clientQr = await window.QRCode.toDataURL(universalUpiUri, {
+            errorCorrectionLevel: 'H',
+            type: 'image/png',
+            margin: 2,
+            width: 360,
+            color: { dark: '#000000', light: '#FFFFFF' }
+          });
+          document.getElementById('upiQrImg').src = clientQr;
+        } catch(qrErr){
+          console.warn('Client QRCode render error:', qrErr);
+          // Tier 3: Fallback to static pre-generated QR asset & public QR server
+          document.getElementById('upiQrImg').src = '/upi_qr.png';
+        }
+      } else {
+        // Tier 3: Pre-rendered static UPI QR asset
+        document.getElementById('upiQrImg').src = '/upi_qr.png';
+      }
     }
   } else {
     // Cash on Delivery
@@ -3813,8 +3865,8 @@ window.openPaymentSettingsModal = async function(){
       if(document.getElementById('setStoreEmail')) document.getElementById('setStoreEmail').value = s.storeEmail || 'orders@ungamarket.com';
       if(document.getElementById('setSupportEmail')) document.getElementById('setSupportEmail').value = s.supportEmail || 'support@ungamarket.com';
       if(document.getElementById('setStorePin')) document.getElementById('setStorePin').value = s.storePin || '1234';
-      document.getElementById('setUpiVpa').value = s.upiVpa || 'ungamarket@okaxis';
-      document.getElementById('setPayeeName').value = s.payeeName || 'Unga Market Wholesale Hub';
+      document.getElementById('setUpiVpa').value = s.upiVpa || 'jay.pratap.madhavan@okaxis';
+      document.getElementById('setPayeeName').value = s.payeeName || 'Jay Prathap';
       document.getElementById('setGpayPhone').value = s.gpayPhone || '9840123456';
       document.getElementById('setPhonepeNumber').value = s.phonepeNumber || '9840123456';
       document.getElementById('setBankName').value = s.bankName || 'HDFC Bank';
@@ -3822,18 +3874,39 @@ window.openPaymentSettingsModal = async function(){
       document.getElementById('setIfscCode').value = s.ifscCode || 'HDFC0001234';
       document.getElementById('setInstructions').value = s.instructions || '';
       
-      updateSettingsQrPreview(s.upiVpa, s.payeeName);
+      updateSettingsQrPreview(s.upiVpa || 'jay.pratap.madhavan@okaxis', s.payeeName || 'Jay Prathap');
     }
   } catch(e){
     console.warn('Error loading payment settings:', e);
+    updateSettingsQrPreview('jay.pratap.madhavan@okaxis', 'Jay Prathap');
   }
   openModal('mPaymentSettings');
 };
 
 window.updateSettingsQrPreview = async function(vpa, name){
+  const v = vpa || document.getElementById('setUpiVpa')?.value.trim() || 'jay.pratap.madhavan@okaxis';
+  const n = name || document.getElementById('setPayeeName')?.value.trim() || 'Jay Prathap';
   const imgEl = document.getElementById('settingsQrPreviewImg');
   const txtEl = document.getElementById('settingsQrPreviewText');
   if(!imgEl) return;
+  
+  const upiUri = `upi://pay?pa=${encodeURIComponent(v)}&pn=${encodeURIComponent(n)}&cu=INR`;
+  
+  if(window.QRCode && window.QRCode.toDataURL){
+    try {
+      const qr = await window.QRCode.toDataURL(upiUri, {
+        errorCorrectionLevel: 'H',
+        type: 'image/png',
+        margin: 2,
+        width: 280,
+        color: { dark: '#000000', light: '#FFFFFF' }
+      });
+      imgEl.src = qr;
+      if(txtEl) txtEl.innerHTML = `VPA: <b>${v}</b> · Payee: <b>${n}</b>`;
+      return;
+    } catch(err){}
+  }
+  
   try {
     const res = await fetch('/api/create-upi-qr', {
       method: 'POST',
@@ -3843,10 +3916,11 @@ window.updateSettingsQrPreview = async function(vpa, name){
     const data = await res.json();
     if(data.success && data.qrDataUrl){
       imgEl.src = data.qrDataUrl;
-      txtEl.innerHTML = `VPA: <b>${data.upiVpa}</b> · Payee: <b>${data.payeeName}</b>`;
+      if(txtEl) txtEl.innerHTML = `VPA: <b>${data.upiVpa}</b> · Payee: <b>${data.payeeName}</b>`;
     }
   } catch(err){
-    txtEl.textContent = 'Preview updated';
+    imgEl.src = '/upi_qr.png';
+    if(txtEl) txtEl.innerHTML = `VPA: <b>${v}</b> · Payee: <b>${n}</b>`;
   }
 };
 

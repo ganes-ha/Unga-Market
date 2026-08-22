@@ -278,8 +278,8 @@ let shopOwnerPaymentSettings = {
   storeEmail: process.env.STORE_EMAIL || 'orders@ungamarket.com',
   supportEmail: process.env.SUPPORT_EMAIL || 'support@ungamarket.com',
   storePin: process.env.STORE_PIN || '1234',
-  upiVpa: process.env.UPI_VPA || 'ungamarket@okaxis',
-  payeeName: process.env.UPI_PAYEE_NAME || 'Unga Market Wholesale',
+  upiVpa: (process.env.UPI_VPA && process.env.UPI_VPA !== 'ganesha2k2@oksbi') ? process.env.UPI_VPA : 'jay.pratap.madhavan@okaxis',
+  payeeName: (process.env.UPI_PAYEE_NAME && process.env.UPI_PAYEE_NAME !== 'UngaMarket') ? process.env.UPI_PAYEE_NAME : 'Jay Prathap',
   gpayPhone: process.env.GPAY_PHONE || '9840123456',
   phonepeNumber: process.env.PHONEPE_NUMBER || '9840123456',
   bankName: 'HDFC Bank / Axis Bank',
@@ -547,38 +547,54 @@ app.post('/api/auth/verify-otp', (req, res) => {
 app.post('/api/create-upi-qr', async (req, res) => {
   try {
     const { amount, orderId, note } = req.body;
-    if (!amount || !orderId) {
-      return res.status(400).json({ error: 'amount and orderId are required' });
-    }
-    const upiVpa = shopOwnerPaymentSettings.upiVpa || 'ungamarket@okaxis';
-    const upiPayeeName = shopOwnerPaymentSettings.payeeName || 'Unga Market Wholesale';
+    const upiVpa = shopOwnerPaymentSettings.upiVpa || 'jay.pratap.madhavan@okaxis';
+    const upiPayeeName = shopOwnerPaymentSettings.payeeName || 'Jay Prathap';
     const gpayPhone = shopOwnerPaymentSettings.gpayPhone || '9840123456';
     const phonepeNumber = shopOwnerPaymentSettings.phonepeNumber || '9840123456';
-    const txNote = encodeURIComponent(note || `Order ${orderId}`);
+    const cleanNote = String(note || (orderId ? `Order ${orderId}` : 'Wholesale Payment')).trim().substring(0, 40);
+    const txNote = encodeURIComponent(cleanNote);
     const encodedName = encodeURIComponent(upiPayeeName);
-    const formattedAmount = Number(amount).toFixed(2);
+    const formattedAmount = amount ? Number(amount).toFixed(2) : null;
     
-    // Standard NPCI UPI URI Specification (Universal QR format accepted across all Indian UPI apps)
-    const upiUri = `upi://pay?pa=${upiVpa}&pn=${encodedName}&mc=5411&tid=${orderId}&tr=${orderId}&tn=${txNote}&am=${formattedAmount}&cu=INR`;
+    // Standard Universal NPCI UPI URI Specification (Compatible with GPay, PhonePe, Paytm, BHIM, Cred)
+    let upiUri = `upi://pay?pa=${upiVpa}&pn=${encodedName}&cu=INR`;
+    if (formattedAmount && formattedAmount > 0) {
+      upiUri += `&am=${formattedAmount}&tn=${txNote}`;
+    }
+    const staticUpiUri = `upi://pay?pa=${upiVpa}&pn=${encodedName}&cu=INR`;
     
     // Generate high-resolution QR code with error correction
     const qrDataUrl = await QRCode.toDataURL(upiUri, {
       errorCorrectionLevel: 'H',
       type: 'image/png',
       margin: 2,
-      width: 320,
+      width: 360,
       color: {
-        dark: '#0A6B2E',
+        dark: '#000000',
+        light: '#FFFFFF'
+      }
+    });
+
+    const staticQrDataUrl = await QRCode.toDataURL(staticUpiUri, {
+      errorCorrectionLevel: 'H',
+      type: 'image/png',
+      margin: 2,
+      width: 360,
+      color: {
+        dark: '#000000',
         light: '#FFFFFF'
       }
     });
 
     res.json({
       success: true,
-      orderId,
-      amount: formattedAmount,
+      orderId: orderId || 'DIRECT',
+      amount: formattedAmount || '0.00',
       upiUri,
+      staticUpiUri,
       qrDataUrl,
+      staticQrDataUrl,
+      staticAssetUrl: '/upi_qr.png',
       upiVpa,
       payeeName: upiPayeeName,
       gpayPhone,
@@ -586,15 +602,15 @@ app.post('/api/create-upi-qr', async (req, res) => {
       paymentSettings: shopOwnerPaymentSettings,
       intents: {
         universal: upiUri,
-        gpay: `upi://pay?pa=${upiVpa}&pn=${encodedName}&mc=5411&tid=${orderId}&tr=${orderId}&tn=${txNote}&am=${formattedAmount}&cu=INR`,
-        phonepe: `upi://pay?pa=${upiVpa}&pn=${encodedName}&mc=5411&tid=${orderId}&tr=${orderId}&tn=${txNote}&am=${formattedAmount}&cu=INR`,
-        paytm: `paytmmp://pay?pa=${upiVpa}&pn=${encodedName}&am=${formattedAmount}&cu=INR&tn=${txNote}`,
-        bhim: `upi://pay?pa=${upiVpa}&pn=${encodedName}&am=${formattedAmount}&cu=INR&tn=${txNote}`
+        gpay: upiUri,
+        phonepe: upiUri,
+        paytm: formattedAmount ? `paytmmp://pay?pa=${upiVpa}&pn=${encodedName}&am=${formattedAmount}&cu=INR&tn=${txNote}` : `paytmmp://pay?pa=${upiVpa}&pn=${encodedName}&cu=INR`,
+        bhim: upiUri
       }
     });
   } catch (err) {
     console.error('Error generating UPI QR:', err);
-    res.status(500).json({ error: 'Failed to generate UPI QR code' });
+    res.status(500).json({ error: 'Failed to generate UPI QR code', staticAssetUrl: '/upi_qr.png' });
   }
 });
 

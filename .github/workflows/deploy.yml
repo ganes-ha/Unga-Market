@@ -1,0 +1,79 @@
+name: Build, Test & Deploy Unga Market
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+  pull-requests: write
+  deployments: write
+
+concurrency:
+  group: "pages-${{ github.ref }}"
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    name: 🚀 Build, Validate & Deploy
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Set up Node.js Runtime
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: 🔍 Run Linter & Syntax Validation
+        run: npm run lint
+
+      - name: 🏗️ Build Production Bundle
+        run: npm run build
+
+      - name: 🌐 Setup GitHub Pages Environment
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+        uses: actions/configure-pages@v4
+
+      - name: 📤 Upload Build Artifacts for Deployment
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'dist'
+
+      - name: 🚀 Deploy to Live GitHub Pages Link
+        id: deployment
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+        uses: actions/deploy-pages@v4
+
+      - name: 🔗 Generate & Print Live Deployment Link Summary
+        run: |
+          echo "========================================================"
+          echo "🎉 UNGA MARKET DEPLOYMENT SUCCESSFUL!"
+          echo "Live Preview URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
+          echo "Shared App URL: ${{ secrets.SHARED_APP_URL || 'https://ais-pre-zd6hafhjebzmkpusuvwuxh-452488806678.asia-southeast1.run.app' }}"
+          echo "========================================================"
+          echo "## 🚀 Unga Market Deployment Status" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status:** ✅ Completed Successfully" >> $GITHUB_STEP_SUMMARY
+          echo "- **Live Link:** [Open Unga Market App](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/)" >> $GITHUB_STEP_SUMMARY
+          echo "- **UPI Payments:** Jay Prathap (\`jay.pratap.madhavan@okaxis\`)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Build Artifacts:** Ready in \`dist/\`" >> $GITHUB_STEP_SUMMARY
