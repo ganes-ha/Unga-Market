@@ -34,16 +34,10 @@ jobs:
       - name: ⚙️ Set up Node.js Runtime
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: 'npm'
+          node-version: 22
 
       - name: 📦 Install Dependencies
-        run: |
-          if [ -f package-lock.json ]; then
-            npm ci
-          else
-            npm install
-          fi
+        run: npm install
 
       - name: 🔍 Run Linter & Syntax Validation
         run: npm run lint
