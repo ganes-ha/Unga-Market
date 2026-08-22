@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, Grid, ShoppingBag, Truck, Share2, Store } from 'lucide-react';
+import { Home, Grid, ShoppingBag, Truck, Store } from 'lucide-react';
 
 interface MobileNavProps {
   activeTab: 'customer' | 'shopowner' | 'delivery';
@@ -7,7 +7,6 @@ interface MobileNavProps {
   cartCount: number;
   cartTotal: number;
   onOpenCart: () => void;
-  onOpenMobileShare: () => void;
   onOpenCategories: () => void;
 }
 
@@ -17,7 +16,6 @@ export const MobileNav: React.FC<MobileNavProps> = ({
   cartCount,
   cartTotal,
   onOpenCart,
-  onOpenMobileShare,
   onOpenCategories
 }) => {
   return (

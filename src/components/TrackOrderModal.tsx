@@ -17,7 +17,7 @@ export const TrackOrderModal: React.FC<TrackOrderModalProps> = ({
 
   const steps = [
     { status: 'Pending', label: 'Order Received', desc: 'Shop owner confirmed order', icon: Clock },
-    { status: 'Packed', label: 'Packed & Invoiced', desc: 'Wholesale items packed at Velachery Hub', icon: PackageCheck },
+    { status: 'Packed', label: 'Packed & Invoiced', desc: 'Items packed at Velachery Hub', icon: PackageCheck },
     { status: 'Shipped', label: 'Out for Delivery', desc: 'Assigned to Express Rider RD-409', icon: Truck },
     { status: 'Delivered', label: 'Delivered', desc: 'Handover complete', icon: CheckCircle }
   ];

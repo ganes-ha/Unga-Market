@@ -71,7 +71,7 @@ export function createProductSVG(p: Product): string {
     </defs>
     <rect width="320" height="320" rx="16" fill="url(#bg)"/>
     
-    <!-- FMCG Pack Shape -->
+    <!-- Pack Shape -->
     <g filter="url(#shadow)">
       <rect x="55" y="45" width="210" height="230" rx="18" fill="#FFFFFF" stroke="${themeColor}" stroke-width="2.5"/>
       <rect x="55" y="45" width="210" height="55" rx="18" fill="${themeColor}"/>
@@ -90,7 +90,7 @@ export function createProductSVG(p: Product): string {
       <text x="160" y="253" fill="${themeColor}" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="800" text-anchor="middle">NET: ${size}</text>
     </g>
 
-    <!-- Wholesale Authentic Badge -->
+    <!-- Authentic Badge -->
     <rect x="18" y="18" width="76" height="22" rx="6" fill="${accentColor}"/>
     <text x="56" y="33" fill="#FFFFFF" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="900" text-anchor="middle">WHOLESALE</text>
   </svg>`;

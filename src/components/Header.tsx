@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShoppingBag, Search, Mic, Sparkles, QrCode, MapPin, Store, Truck, User } from 'lucide-react';
+import { ShoppingBag, Search, Mic, Sparkles, MapPin, Store, Truck } from 'lucide-react';
 import { User as UserType } from '../types';
 
 interface HeaderProps {
@@ -10,7 +10,6 @@ interface HeaderProps {
   onOpenCart: () => void;
   onOpenAiRecipe: () => void;
   onOpenVoice: () => void;
-  onOpenMobileShare: () => void;
   activeTab: 'customer' | 'shopowner' | 'delivery';
   onChangeTab: (tab: 'customer' | 'shopowner' | 'delivery') => void;
   currentUser: UserType | null;
@@ -28,7 +27,6 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenCart,
   onOpenAiRecipe,
   onOpenVoice,
-  onOpenMobileShare,
   activeTab,
   onChangeTab,
   currentUser,
@@ -42,17 +40,8 @@ export const Header: React.FC<HeaderProps> = ({
       {/* Top Banner: Free Delivery + Hub Status */}
       <div className="bg-emerald-800 text-white text-[11px] font-bold px-4 py-1.5 flex items-center justify-between">
         <div className="flex items-center gap-2 overflow-hidden text-ellipsis whitespace-nowrap">
-          <span className="bg-emerald-600 text-white px-1.5 py-0.2 rounded text-[10px]">DIRECT FMCG</span>
-          <span>⚡ Flat 20% Off Wholesale Pricing · Free 10-15 Min Delivery in Chennai on ₹499+</span>
-        </div>
-        <div className="hidden sm:flex items-center gap-3">
-          <button
-            onClick={onOpenMobileShare}
-            className="flex items-center gap-1 hover:text-emerald-200 transition-colors cursor-pointer"
-          >
-            <QrCode size={13} />
-            <span>Open on Mobile / Share</span>
-          </button>
+          <span className="bg-emerald-600 text-white px-1.5 py-0.2 rounded text-[10px]">DIRECT</span>
+          <span>⚡ Flat 20% Off Direct Pricing · Free 10-15 Min Delivery in Chennai on ₹499+</span>
         </div>
       </div>
 
@@ -64,16 +53,26 @@ export const Header: React.FC<HeaderProps> = ({
             className="flex items-center gap-2 cursor-pointer select-none"
             onClick={() => onChangeTab('customer')}
           >
-            <div className="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center text-white font-black text-xl shadow-xs">
-              U
-            </div>
+            <svg viewBox="0 0 44 44" className="w-10 h-10 flex-shrink-0">
+              <defs>
+                <linearGradient id="hdrLogoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#149A46" />
+                  <stop offset="100%" stopColor="#0A6B2E" />
+                </linearGradient>
+              </defs>
+              <rect width="44" height="44" rx="12" fill="url(#hdrLogoGrad)" />
+              <circle cx="33" cy="10" r="5" fill="#FF5722" />
+              <path d="M 28 20 C 32 8, 40 6, 42 10 C 38 24, 32 27, 28 20 Z" fill="#4CAF50" />
+              <path d="M 28 20 Q 35 15 42 10" stroke="#81C784" strokeWidth="1.5" fill="none" />
+              <text x="22" y="35" textAnchor="middle" fontFamily="Arial Black, sans-serif" fontWeight="900" fontSize="22" fill="white">U</text>
+            </svg>
             <div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-xl font-black tracking-tight text-slate-900 leading-none">UNGA</span>
-                <span className="text-xl font-black tracking-tight text-orange-500 leading-none">MARKET</span>
+              <div className="flex items-baseline gap-1">
+                <span className="text-xl font-black tracking-tight leading-none" style={{ background: 'linear-gradient(to right, #139543, #085F27)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Unga</span>
+                <span className="text-xl font-black tracking-tight leading-none" style={{ background: 'linear-gradient(to right, #FF3E14, #D92200)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Market</span>
               </div>
               <span className="text-[10px] font-extrabold text-emerald-700 tracking-wider uppercase block">
-                Wholesale Direct Hub
+                Your Everyday, Our Priority!
               </span>
             </div>
           </div>
@@ -101,7 +100,7 @@ export const Header: React.FC<HeaderProps> = ({
             <Search size={16} className="absolute left-3.5 text-slate-400 pointer-events-none" />
             <input
               type="text"
-              placeholder="Search 1,600+ wholesale items (Tata Tea, Maggi, Fortune, Surf Excel)..."
+              placeholder="Search 1,600+ items (Tata Tea, Maggi, Fortune, Surf Excel)..."
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
               className="w-full pl-9 pr-20 py-2 bg-slate-100 focus:bg-white border border-slate-200 focus:border-emerald-500 rounded-xl text-[13px] font-semibold text-slate-800 placeholder-slate-400 outline-none transition-all"
@@ -181,7 +180,7 @@ export const Header: React.FC<HeaderProps> = ({
               )}
             </div>
             <div className="hidden sm:flex flex-col text-left leading-none">
-              <span className="text-[10px] font-semibold text-emerald-100">Wholesale Cart</span>
+              <span className="text-[10px] font-semibold text-emerald-100">Cart</span>
               <span className="text-[13px]">₹{cartTotal.toFixed(0)}</span>
             </div>
           </button>

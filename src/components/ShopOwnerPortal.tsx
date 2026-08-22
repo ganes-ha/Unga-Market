@@ -91,7 +91,7 @@ export const ShopOwnerPortal: React.FC<ShopOwnerPortalProps> = ({
             <div>
               <h2 className="text-xl font-black text-slate-900">Shop Owner Operations Hub</h2>
               <p className="text-xs text-slate-500 font-semibold">
-                Live Wholesale Fulfillment &amp; Dispatch · Chennai Hub
+                Live Fulfillment &amp; Dispatch · Chennai Hub
               </p>
             </div>
           </div>

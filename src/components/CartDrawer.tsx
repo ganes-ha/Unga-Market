@@ -71,13 +71,13 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
           <div className="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
             <div>
               <h3 className="font-extrabold text-slate-900 text-lg flex items-center gap-2">
-                <span>Wholesale Cart</span>
+                <span>Cart</span>
                 <span className="bg-emerald-100 text-emerald-800 text-xs font-black px-2 py-0.5 rounded-full">
                   {cart.reduce((s, i) => s + i.qty, 0)} items
                 </span>
               </h3>
               <p className="text-xs text-slate-500 font-medium">
-                Flat 20% Wholesale Direct from Distributor
+                Flat 20% Direct from Distributor
               </p>
             </div>
             <button
@@ -114,13 +114,13 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 </div>
                 <h4 className="font-extrabold text-slate-800 text-base mb-1">Your cart is empty</h4>
                 <p className="text-xs text-slate-500 max-w-xs mb-4">
-                  Add genuine FMCG essentials from our wholesale catalog at 20% flat discount.
+                  Add genuine essentials from our catalog at 20% flat discount.
                 </p>
                 <button
                   onClick={onClose}
                   className="bg-emerald-600 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-xs hover:bg-emerald-700"
                 >
-                  Browse Wholesale Store
+                  Browse Store
                 </button>
               </div>
             ) : (
@@ -247,7 +247,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                   <span className="line-through text-slate-400">₹{totalMrp.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between font-semibold text-emerald-700">
-                  <span>Wholesale Discount (20%):</span>
+                  <span>Discount (20%):</span>
                   <span>-₹{wholesaleSavings.toFixed(2)}</span>
                 </div>
                 {couponDiscount > 0 && (
@@ -261,7 +261,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                   <span>{deliveryFee === 0 ? <b className="text-emerald-700">FREE</b> : `₹${deliveryFee}`}</span>
                 </div>
                 <div className="flex justify-between items-baseline pt-2 border-t border-slate-200 font-extrabold text-sm text-slate-900">
-                  <span>To Pay (Wholesale Net):</span>
+                  <span>To Pay:</span>
                   <span className="text-lg text-emerald-700">₹{finalTotal.toFixed(2)}</span>
                 </div>
                 <div className="bg-emerald-100 text-emerald-800 text-[11px] font-extrabold p-2 rounded-xl text-center">

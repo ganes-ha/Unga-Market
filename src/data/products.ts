@@ -1,6 +1,6 @@
 import { Product } from "../types";
 
-// Authentic FMCG Wholesale Catalog from Unga Market PDF (Flat 20% Discount)
+// Authentic Product Catalog from Unga Market (Flat 20% Discount)
 export const PRODUCTS: Product[] = [
   // --- Beverages & Premium Teas ---
   {

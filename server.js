@@ -233,7 +233,7 @@ let ordersList = [
     zone: 'OMR - Thoraipakkam',
     timeline: [
       { status: 'Pending', at: Date.now() - 1000 * 60 * 120, note: 'Order received & verified with instant UPI' },
-      { status: 'Packed', at: Date.now() - 1000 * 60 * 85, note: 'Packaged in eco-safe wholesale crate' },
+      { status: 'Packed', at: Date.now() - 1000 * 60 * 85, note: 'Packaged in eco-safe crate' },
       { status: 'Shipped', at: Date.now() - 1000 * 60 * 30, note: 'Out for delivery with driver Murugan V.' }
     ]
   },
@@ -368,7 +368,7 @@ app.post('/api/generate-product-image', async (req, res) => {
     const ai = getAIClient();
     if (ai && process.env.GEMINI_API_KEY) {
       try {
-        const prompt = `Authentic studio packshot photograph of ${brand || ''} ${name || ''} ${size || ''}, authentic consumer packaging FMCG product in India, perfectly centered on a clean white background, high quality lighting, sharp details, 8k resolution.`;
+        const prompt = `Authentic studio packshot photograph of ${brand || ''} ${name || ''} ${size || ''}, authentic consumer packaging product in India, perfectly centered on a clean white background, high quality lighting, sharp details, 8k resolution.`;
         
         const response = await ai.models.generateContent({
           model: 'gemini-3.1-flash-lite-image',
@@ -431,7 +431,7 @@ app.post('/api/auth/login', (req, res) => {
           name: name || 'Shop Owner (Admin)',
           email: identifier || shopOwnerPaymentSettings.storeEmail || 'orders@ungamarket.com',
           phone: phone || shopOwnerPaymentSettings.gpayPhone || '9840000001',
-          store: 'Unga Market Wholesale Hub - Chennai'
+          store: 'Unga Market Hub - Chennai'
         }
       });
     } else {
@@ -561,7 +561,7 @@ app.post('/api/create-upi-qr', async (req, res) => {
     const upiPayeeName = shopOwnerPaymentSettings.payeeName || 'Jay Prathap';
     const gpayPhone = shopOwnerPaymentSettings.gpayPhone || '9840123456';
     const phonepeNumber = shopOwnerPaymentSettings.phonepeNumber || '9840123456';
-    const cleanNote = String(note || (orderId ? `Order ${orderId}` : 'Wholesale Payment')).trim().substring(0, 40);
+    const cleanNote = String(note || (orderId ? `Order ${orderId}` : 'Payment')).trim().substring(0, 40);
     const txNote = encodeURIComponent(cleanNote);
     const encodedName = encodeURIComponent(upiPayeeName);
     const formattedAmount = amount ? Number(amount).toFixed(2) : null;
@@ -715,7 +715,7 @@ app.patch('/api/orders/:id/status', (req, res) => {
     if (!order.timeline) order.timeline = [];
     
     let defaultNote = '';
-    if (status === 'Packed') defaultNote = 'Order packed & verified at wholesale distribution hub';
+    if (status === 'Packed') defaultNote = 'Order packed & verified at distribution hub';
     else if (status === 'Shipped') defaultNote = 'Dispatched and out for delivery with partner';
     else if (status === 'Delivered') defaultNote = 'Delivered to customer address. Order completed ✓';
 
@@ -786,7 +786,7 @@ app.get('/api/delivery-clusters', (req, res) => {
       busiestZoneCount: busiest ? busiest.activeOrdersCount : 0,
       activeFleetDrivers: 4,
       avgDeliveryTimeMins: 14,
-      hubLocation: 'Unga Market Central Wholesale Distribution Hub, Velachery Main Rd, Chennai'
+      hubLocation: 'Unga Market Central Distribution Hub, Velachery Main Rd, Chennai'
     }
   });
 });
@@ -825,7 +825,7 @@ app.post('/api/products', (req, res) => {
     };
 
     dynamicProductModifications.set(id, newProd);
-    res.json({ success: true, product: newProd, message: 'Product added to wholesale catalog' });
+    res.json({ success: true, product: newProd, message: 'Product added to catalog' });
   } catch (err) {
     console.error('Error adding product:', err);
     res.status(500).json({ success: false, error: 'Failed to add product' });
@@ -917,7 +917,7 @@ app.post('/api/apply-coupon', (req, res) => {
       success: true,
       code: 'SUPER20',
       discount,
-      message: `✨ SUPER20 applied! 20% Extra Wholesale Cashback (Saved ₹${discount})!`
+      message: `✨ SUPER20 applied! 20% Extra Cashback (Saved ₹${discount})!`
     });
   }
 
