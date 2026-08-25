@@ -1,6 +1,7 @@
 import React from 'react';
-import { ShoppingBag, Search, Mic, Sparkles, MapPin, Store, Truck, User, ChevronDown } from 'lucide-react';
+import { ShoppingBag, Search, Mic, Sparkles, Navigation, Store, Truck, User, RotateCw } from 'lucide-react';
 import { User as UserType } from '../types';
+import { LocationState } from '../utils/locationEta';
 
 interface HeaderProps {
   searchQuery: string;
@@ -15,8 +16,8 @@ interface HeaderProps {
   currentUser: UserType | null;
   onOpenAuth: () => void;
   onLogout: () => void;
-  selectedHub: string;
-  onChangeHub: (hub: string) => void;
+  locationState: LocationState;
+  onRefreshLocation: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -32,29 +33,35 @@ export const Header: React.FC<HeaderProps> = ({
   currentUser,
   onOpenAuth,
   onLogout,
-  selectedHub,
-  onChangeHub
+  locationState,
+  onRefreshLocation
 }) => {
   return (
     <header className="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-xs">
-      {/* Top Banner: Superfast Delivery & Best Price Promise */}
+      {/* Top Banner: Real-Time Superfast Delivery & Best Price Promise */}
       <div className="bg-emerald-800 text-white text-[11px] font-bold px-3 sm:px-4 py-1.5 flex items-center justify-between">
         <div className="flex items-center gap-2 overflow-hidden text-ellipsis whitespace-nowrap mx-auto sm:mx-0">
-          <span className="bg-emerald-500 text-slate-900 font-extrabold px-1.5 py-0.2 rounded text-[10px] uppercase">
-            ⚡ 15 MINS
+          <span className="bg-emerald-400 text-slate-950 font-black px-2 py-0.5 rounded-full text-[10px] uppercase flex items-center gap-1">
+            <span>⚡</span>
+            <span>{locationState.etaMins || 12} MINS ETA</span>
           </span>
-          <span>Supermarket Essentials Delivered in 10–15 Minutes · Free Delivery on ₹199+</span>
+          <span className="truncate">
+            Express Supermarket Delivery · Real-Time GPS Tracking · Free Delivery on ₹199+
+          </span>
         </div>
         <div className="hidden md:flex items-center gap-2 text-emerald-200 text-[10px]">
-          <span>Your Everyday, Our Priority!</span>
+          <span>Everyday Supermarket Essentials at Wholesale Rates</span>
         </div>
       </div>
 
       {/* Main Blinkit-Style Navigation Header */}
       <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2 flex flex-col md:flex-row md:items-center justify-between gap-2.5">
         <div className="flex items-center justify-between gap-2 sm:gap-3 min-w-0">
-          {/* Logo & Delivery Time Header */}
-          <div className="flex items-center gap-2 sm:gap-2.5 cursor-pointer shrink-0" onClick={() => onChangeTab('customer')}>
+          {/* Logo & Real-Time Delivery ETA */}
+          <div
+            className="flex items-center gap-2 sm:gap-2.5 cursor-pointer shrink-0"
+            onClick={() => onChangeTab('customer')}
+          >
             <img
               src="./logo.svg"
               alt="Unga Market"
@@ -62,28 +69,40 @@ export const Header: React.FC<HeaderProps> = ({
             />
             <div className="flex flex-col min-w-0">
               <div className="flex items-baseline gap-1 whitespace-nowrap">
-                <span className="text-[11px] sm:text-[12px] text-slate-500 font-bold leading-none">Unga Market in</span>
-                <span className="text-[14px] sm:text-[16px] font-black text-emerald-700 leading-none">15 mins</span>
+                <span className="text-[11px] sm:text-[12px] text-slate-500 font-bold leading-none">Delivering in</span>
+                <span className="text-[14px] sm:text-[16px] font-black text-emerald-700 leading-none">
+                  {locationState.etaMins || 12} mins ⚡
+                </span>
               </div>
-              
-              {/* Location Selector */}
-              <div className="flex items-center gap-1 text-[11px] sm:text-[12px] font-extrabold text-slate-800 mt-1 hover:text-emerald-700 transition-colors max-w-[140px] sm:max-w-[200px]">
-                <span className="text-emerald-600 font-black shrink-0">HOME -</span>
-                <div className="relative inline-flex items-center min-w-0 flex-1">
-                  <select
-                    value={selectedHub}
-                    onChange={(e) => onChangeHub(e.target.value)}
-                    className="bg-transparent font-extrabold text-slate-800 outline-none cursor-pointer pr-3.5 appearance-none text-[11px] sm:text-[12px] truncate w-full"
-                  >
-                    <option value="Velachery">Block A, Velachery (10m)</option>
-                    <option value="OMR">OMR Thoraipakkam (15m)</option>
-                    <option value="Adyar">Adyar Besant Nagar (12m)</option>
-                    <option value="Guindy">Guindy Industrial (10m)</option>
-                    <option value="Tambaram">Tambaram West (15m)</option>
-                  </select>
-                  <ChevronDown size={11} className="text-slate-500 pointer-events-none absolute right-0 shrink-0" />
-                </div>
-              </div>
+
+              {/* Real-time Geolocation Badge (No predefined address) */}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRefreshLocation();
+                }}
+                className="flex items-center gap-1 text-[10px] sm:text-[11px] font-extrabold text-slate-700 mt-1 hover:text-emerald-700 transition-colors group cursor-pointer bg-slate-100/90 hover:bg-emerald-50 px-2 py-0.5 rounded-lg border border-slate-200"
+                title="Click to refresh live GPS location"
+              >
+                <Navigation
+                  size={11}
+                  className={`text-emerald-600 shrink-0 ${
+                    locationState.status === 'detecting' ? 'animate-spin' : ''
+                  }`}
+                />
+                <span className="truncate">
+                  {locationState.status === 'located'
+                    ? 'Live GPS Active'
+                    : locationState.status === 'detecting'
+                    ? 'Detecting GPS...'
+                    : 'Locate Live GPS'}
+                </span>
+                <RotateCw
+                  size={9}
+                  className="text-slate-400 group-hover:text-emerald-600 opacity-70 group-hover:opacity-100 transition-opacity ml-0.5 shrink-0"
+                />
+              </button>
             </div>
           </div>
 

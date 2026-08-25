@@ -195,11 +195,11 @@ let ordersList = [
       name: 'Karthik Raja',
       phone: '9840123456',
       email: 'karthik@gmail.com',
-      street: 'Plot 42, Annai Nagar 2nd Street',
-      area: 'Velachery',
-      pincode: '600042'
+      locationNote: 'Flat 42, 2nd Floor'
     },
-    addr: 'Plot 42, Annai Nagar 2nd Street, Velachery, Chennai - 600042',
+    geo: { lat: 12.9815, lng: 80.2180, accuracy: 15, distanceKm: 2.1 },
+    etaMins: 12,
+    etaTimeStr: new Date(Date.now() + 12 * 60000).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true }),
     phone: '9840123456',
     items: [
       { id: 'UM401', name: 'Tata Tea Gold Rich Taste & Aroma', brand: 'Tata Tea', size: '500 g', qty: 2, price: 256, mrp: 320 },
@@ -219,8 +219,6 @@ let ordersList = [
     status: 'Packed',
     driver: { name: 'Murugan V. (Fleet)', phone: '9876500112', vehicle: 'TN-07-CS-4421' },
     assignedDriver: { name: 'Murugan V. (Fleet)', phone: '9876500112', vehicle: 'TN-07-CS-4421' },
-    zone: 'Velachery Hub',
-    deliveryZone: 'Velachery Hub',
     timeline: [
       { status: 'Pending', at: Date.now() - 1000 * 60 * 45, note: 'Order placed & paid via Google Pay (₹772.00 with ₹20 Driver Tip)' },
       { status: 'Packed', at: Date.now() - 1000 * 60 * 20, note: 'Quality checked and packed at Unga Market Hub' }
@@ -234,11 +232,11 @@ let ordersList = [
       name: 'Priya Sundaram',
       phone: '9790234567',
       email: 'priya.s@gmail.com',
-      street: 'Flat 3B, Green Paradise Apts',
-      area: 'OMR Thoraipakkam',
-      pincode: '600097'
+      locationNote: 'Flat 3B, Green Paradise'
     },
-    addr: 'Flat 3B, Green Paradise Apts, OMR Thoraipakkam, Chennai - 600097',
+    geo: { lat: 12.9348, lng: 80.2312, accuracy: 20, distanceKm: 4.8 },
+    etaMins: 15,
+    etaTimeStr: new Date(Date.now() + 15 * 60000).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true }),
     phone: '9790234567',
     items: [
       { id: 'UM407', name: 'Boost Secret of Energy Malt Health Drink', brand: 'Boost', size: '500 g Refill', qty: 1, price: 245, mrp: 290 },
@@ -257,8 +255,6 @@ let ordersList = [
     status: 'Shipped',
     driver: { name: 'Murugan V. (Fleet)', phone: '9876500112', vehicle: 'TN-07-CS-4421' },
     assignedDriver: { name: 'Murugan V. (Fleet)', phone: '9876500112', vehicle: 'TN-07-CS-4421' },
-    zone: 'OMR - Thoraipakkam',
-    deliveryZone: 'OMR - Thoraipakkam',
     timeline: [
       { status: 'Pending', at: Date.now() - 1000 * 60 * 120, note: 'Order received & verified with instant UPI' },
       { status: 'Packed', at: Date.now() - 1000 * 60 * 85, note: 'Packaged in eco-safe grocery crate' },
@@ -273,11 +269,11 @@ let ordersList = [
       name: 'Venkatesh S.',
       phone: '9841199882',
       email: 'venkat@gmail.com',
-      street: 'Door 18, 1st Cross Street, Gandhi Nagar',
-      area: 'Adyar',
-      pincode: '600020'
+      locationNote: 'Door 18, 1st Floor'
     },
-    addr: 'Door 18, 1st Cross Street, Gandhi Nagar, Adyar, Chennai - 600020',
+    geo: { lat: 13.0012, lng: 80.2565, accuracy: 12, distanceKm: 5.4 },
+    etaMins: 18,
+    etaTimeStr: new Date(Date.now() + 18 * 60000).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true }),
     phone: '9841199882',
     items: [
       { id: 'UM701', name: 'Dettol Original Germ Protection Bathing Soap', brand: 'Dettol', size: '4 x 125 g (Save Pack)', qty: 2, price: 180, mrp: 215 },
@@ -295,8 +291,6 @@ let ordersList = [
     paymentId: 'COD_READY',
     status: 'Pending',
     driver: null,
-    zone: 'Adyar - Besant Nagar',
-    deliveryZone: 'Adyar - Besant Nagar',
     timeline: [
       { status: 'Pending', at: Date.now() - 1000 * 60 * 180, note: 'Cash on Delivery order registered' }
     ]

@@ -34,10 +34,17 @@ export interface Order {
   customer: {
     name: string;
     phone: string;
-    street: string;
-    area: string;
-    pincode: string;
+    street?: string;
+    area?: string;
+    pincode?: string;
     landmark?: string;
+    locationNote?: string;
+  };
+  geo?: {
+    lat: number;
+    lng: number;
+    accuracy?: number;
+    distanceKm?: number;
   };
   items: OrderItem[];
   subtotal: number;
@@ -56,6 +63,7 @@ export interface Order {
   };
   deliveryZone?: string;
   etaMins?: number;
+  etaTimeStr?: string;
 }
 
 export interface User {

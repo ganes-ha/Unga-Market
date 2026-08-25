@@ -15,6 +15,7 @@ import { VoiceModal } from './components/VoiceModal';
 import { TrackOrderModal } from './components/TrackOrderModal';
 import confetti from 'canvas-confetti';
 import { Sparkles, ShoppingBag, Truck, Store, Filter, Tag, CheckCircle2, ChevronRight, Zap, Clock, ShieldCheck } from 'lucide-react';
+import { LocationState, fetchRealtimeGeolocation, computeDeliveryEta } from './utils/locationEta';
 
 const CATEGORIES: Category[] = [
   { id: 'all', name: 'All Products', emoji: '🛒' },
@@ -79,7 +80,36 @@ export function App() {
       return null;
     }
   });
-  const [selectedHub, setSelectedHub] = useState('Velachery');
+
+  // Real-Time Geolocation & Dynamic ETA State (No predefined addresses)
+  const [locationState, setLocationState] = useState<LocationState>(() => {
+    const initialEta = computeDeliveryEta(2.1);
+    return {
+      status: 'detecting',
+      coords: null,
+      etaMins: initialEta.etaMins,
+      etaDisplay: initialEta.etaDisplay,
+      etaTimeStr: initialEta.etaTimeStr,
+      distanceKm: initialEta.distanceKm,
+      lastUpdated: Date.now()
+    };
+  });
+
+  const handleRefreshLocation = () => {
+    setLocationState((prev) => ({ ...prev, status: 'detecting' }));
+    fetchRealtimeGeolocation().then((loc) => {
+      setLocationState(loc);
+      if (loc.status === 'located') {
+        showToast(`📍 Live GPS synced: ${loc.etaMins} mins express delivery`);
+      } else {
+        showToast('📍 Live GPS active');
+      }
+    });
+  };
+
+  useEffect(() => {
+    handleRefreshLocation();
+  }, []);
 
   // Search & Filtering State
   const [searchQuery, setSearchQuery] = useState('');
@@ -431,8 +461,8 @@ export function App() {
           } catch (e) {}
           showToast('Signed out successfully');
         }}
-        selectedHub={selectedHub}
-        onChangeHub={setSelectedHub}
+        locationState={locationState}
+        onRefreshLocation={handleRefreshLocation}
       />
 
       {/* Main View Container */}
@@ -465,15 +495,15 @@ export function App() {
               {/* Primary Festive Banner (Inspired by Blinkit image 2) */}
               <div className="md:col-span-2 bg-gradient-to-r from-emerald-800 via-emerald-700 to-teal-800 rounded-3xl p-5 sm:p-6 text-white shadow-xs relative overflow-hidden flex flex-col justify-between min-h-[140px]">
                 <div className="space-y-1 relative z-10">
-                  <div className="inline-flex items-center gap-1.5 bg-emerald-500 text-slate-950 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                  <div className="inline-flex items-center gap-1.5 bg-emerald-400 text-slate-950 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider">
                     <Zap size={11} className="fill-current" />
-                    <span>⚡ 10–15 Mins Superfast Delivery</span>
+                    <span>⚡ {locationState.etaMins || 12} Mins Real-Time Express Delivery</span>
                   </div>
                   <h1 className="text-xl sm:text-2xl font-black tracking-tight text-white mt-1">
                     Supermarket Essentials at Everyday Best Prices
                   </h1>
                   <p className="text-xs text-emerald-100/90 max-w-lg font-medium">
-                    Farm fresh produce, dairy, staples, snacks, beverages and household essentials delivered right to your doorstep.
+                    Farm fresh produce, dairy, staples, snacks, beverages and household essentials delivered right to your live location in {locationState.etaMins || 12} minutes.
                   </p>
                 </div>
 
@@ -689,6 +719,7 @@ export function App() {
         couponDiscount={couponDiscount}
         onApplyCoupon={handleApplyCoupon}
         onRemoveCoupon={handleRemoveCoupon}
+        etaMins={locationState.etaMins}
       />
 
       {/* Checkout Modal */}
@@ -703,6 +734,8 @@ export function App() {
         couponCode={couponCode}
         onOrderSuccess={handleOrderSuccess}
         currentUser={currentUser}
+        locationState={locationState}
+        onRefreshLocation={handleRefreshLocation}
       />
 
       {/* UPI / GPay Dynamic QR Modal */}

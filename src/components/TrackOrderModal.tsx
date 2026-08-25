@@ -93,11 +93,28 @@ export const TrackOrderModal: React.FC<TrackOrderModalProps> = ({
           {/* Delivery & Payment Info */}
           <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-2 text-xs">
             <div className="flex justify-between">
-              <span className="text-slate-500 font-bold">Delivery Address:</span>
-              <span className="font-extrabold text-slate-800 text-right">
-                {order.customer?.street
-                  ? `${order.customer.street}, ${order.customer.area || ''}`
-                  : (order as any).addr || 'Chennai'}
+              <span className="text-slate-500 font-bold">Delivery Destination:</span>
+              <span className="font-extrabold text-emerald-800 text-right flex items-center gap-1">
+                <MapPin size={12} className="text-emerald-600 shrink-0" />
+                <span>
+                  {order.geo
+                    ? `Live GPS Pin (${order.geo.lat.toFixed(4)}°, ${order.geo.lng.toFixed(4)}°)`
+                    : order.customer?.locationNote || 'Real-Time GPS Location'}
+                </span>
+              </span>
+            </div>
+            {order.customer?.locationNote && (
+              <div className="flex justify-between">
+                <span className="text-slate-500 font-bold">Door / Flat:</span>
+                <span className="font-extrabold text-slate-800 text-right">
+                  {order.customer.locationNote}
+                </span>
+              </div>
+            )}
+            <div className="flex justify-between">
+              <span className="text-slate-500 font-bold">Estimated Delivery:</span>
+              <span className="font-extrabold text-emerald-700">
+                ⚡ {order.etaMins || 12} Mins ETA {order.etaTimeStr ? `(~ ${order.etaTimeStr})` : ''}
               </span>
             </div>
             <div className="flex justify-between">

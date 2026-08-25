@@ -14,6 +14,7 @@ interface CartDrawerProps {
   couponDiscount: number;
   onApplyCoupon: (code: string) => Promise<boolean>;
   onRemoveCoupon: () => void;
+  etaMins?: number;
 }
 
 export const CartDrawer: React.FC<CartDrawerProps> = ({
@@ -26,7 +27,8 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   couponCode,
   couponDiscount,
   onApplyCoupon,
-  onRemoveCoupon
+  onRemoveCoupon,
+  etaMins = 12
 }) => {
   const [couponInput, setCouponInput] = useState('');
   const [couponLoading, setCouponLoading] = useState(false);
@@ -76,8 +78,8 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                   {cart.reduce((s, i) => s + i.qty, 0)} items
                 </span>
               </h3>
-              <p className="text-xs text-slate-500 font-medium">
-                ⚡ Delivered in 10-15 Mins · Unga Market
+              <p className="text-xs text-emerald-700 font-bold flex items-center gap-1">
+                <span>⚡ Delivering in {etaMins} Mins · Live GPS Tracking</span>
               </p>
             </div>
             <button

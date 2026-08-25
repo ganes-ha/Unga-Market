@@ -169,12 +169,20 @@ export const DeliveryPartnerPortal: React.FC<DeliveryPartnerPortalProps> = ({
                     <span>{order.customer?.phone || (order as any).phone || 'N/A'}</span>
                   </div>
                   <div className="text-slate-600 flex items-start gap-1">
-                    <MapPin size={12} className="text-slate-400 mt-0.5 flex-shrink-0" />
-                    <span className="truncate">
-                      {order.customer?.street
-                        ? `${order.customer.street}, ${order.customer.area || ''}`
-                        : (order as any).addr || 'Chennai'}
+                    <MapPin size={12} className="text-emerald-600 mt-0.5 flex-shrink-0" />
+                    <span className="truncate font-semibold text-emerald-900">
+                      {order.geo
+                        ? `Live GPS Pin (${order.geo.lat.toFixed(4)}°, ${order.geo.lng.toFixed(4)}°)`
+                        : order.customer?.locationNote || 'Real-Time GPS Location'}
                     </span>
+                  </div>
+                  {order.customer?.locationNote && (
+                    <div className="text-slate-500 text-[11px] pl-4">
+                      Door: {order.customer.locationNote}
+                    </div>
+                  )}
+                  <div className="text-emerald-700 font-extrabold text-[11px] pl-4">
+                    ⚡ ETA: {order.etaMins || 12} mins {order.etaTimeStr ? `(~ ${order.etaTimeStr})` : ''}
                   </div>
                 </div>
 

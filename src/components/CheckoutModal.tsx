@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { X, MapPin, Navigation, Smartphone, User, Home, ShieldCheck, Check } from 'lucide-react';
+import { X, Navigation, Smartphone, User, ShieldCheck, CheckCircle2, RotateCw, Clock, MapPin } from 'lucide-react';
 import { CartItem, User as UserType } from '../types';
+import { LocationState } from '../utils/locationEta';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -13,6 +14,8 @@ interface CheckoutModalProps {
   couponCode?: string;
   onOrderSuccess: (orderData: any, payMethod: 'gpay' | 'upi' | 'cod') => void;
   currentUser?: UserType | null;
+  locationState: LocationState;
+  onRefreshLocation: () => void;
 }
 
 export const CheckoutModal: React.FC<CheckoutModalProps> = ({
@@ -25,16 +28,15 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   finalTotal,
   couponCode,
   onOrderSuccess,
-  currentUser
+  currentUser,
+  locationState,
+  onRefreshLocation
 }) => {
   const [name, setName] = useState(currentUser?.name || '');
   const [phone, setPhone] = useState(currentUser?.phone || '');
-  const [street, setStreet] = useState('');
-  const [area, setArea] = useState('Velachery, Chennai');
-  const [pincode, setPincode] = useState('600042');
+  const [doorNote, setDoorNote] = useState('');
   const [landmark, setLandmark] = useState('');
   const [payType, setPayType] = useState<'gpay' | 'upi' | 'cod'>('gpay');
-  const [isLocating, setIsLocating] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -47,52 +49,10 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
   if (!isOpen) return null;
 
-  const handleUseGPS = () => {
-    if (!navigator.geolocation) {
-      setErrorMsg('Geolocation is not supported by this browser.');
-      return;
-    }
-    setIsLocating(true);
-    setErrorMsg('');
-
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
-        try {
-          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
-          const data = await res.json();
-          if (data && data.address) {
-            const addr = data.address;
-            const road = addr.road || addr.suburb || addr.neighbourhood || 'Main Road';
-            const suburb = addr.suburb || addr.city_district || addr.city || 'Chennai';
-            const post = addr.postcode || '600042';
-            setStreet(road);
-            setArea(`${suburb}, Chennai`);
-            setPincode(post);
-          } else {
-            setArea(`GPS (${lat.toFixed(4)}, ${lng.toFixed(4)}), Chennai`);
-          }
-        } catch (e) {
-          setArea(`GPS Location (${lat.toFixed(4)}, ${lng.toFixed(4)})`);
-        } finally {
-          setIsLocating(false);
-        }
-      },
-      (err) => {
-        setIsLocating(false);
-        setErrorMsg('Location permission denied. Please enter address manually.');
-      },
-      { enableHighAccuracy: true, timeout: 8000 }
-    );
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return setErrorMsg('Please enter customer name');
     if (!phone.trim() || phone.trim().length < 10) return setErrorMsg('Please enter valid 10-digit mobile number');
-    if (!street.trim()) return setErrorMsg('Please enter door number and street address');
-    if (!pincode.trim() || pincode.trim().length < 6) return setErrorMsg('Please enter 6-digit Chennai pincode');
 
     setIsSubmitting(true);
     setErrorMsg('');
@@ -101,12 +61,24 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
       customer: {
         name: name.trim(),
         phone: phone.trim(),
-        street: street.trim(),
-        area: area.trim(),
-        pincode: pincode.trim(),
-        landmark: landmark.trim()
+        locationNote: doorNote.trim() || undefined,
+        landmark: landmark.trim() || undefined
       },
-      items: cart.map(i => ({
+      geo: locationState.coords
+        ? {
+            lat: locationState.coords.latitude,
+            lng: locationState.coords.longitude,
+            accuracy: locationState.coords.accuracy,
+            distanceKm: locationState.distanceKm
+          }
+        : {
+            lat: 12.9815,
+            lng: 80.2180,
+            distanceKm: locationState.distanceKm
+          },
+      etaMins: locationState.etaMins || 12,
+      etaTimeStr: locationState.etaTimeStr,
+      items: cart.map((i) => ({
         id: i.product.id,
         name: i.product.n,
         brand: i.product.b,
@@ -146,16 +118,21 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
-      <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+      <div className="bg-white rounded-3xl max-w-lg w-full shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
         {/* Header */}
-        <div className="bg-slate-50 border-b border-slate-200 px-5 py-4 flex items-center justify-between">
+        <div className="bg-emerald-800 text-white px-5 py-4 flex items-center justify-between">
           <div>
-            <h3 className="font-black text-slate-900 text-lg">Delivery & Payment</h3>
-            <p className="text-xs text-slate-500 font-medium">10–15 Mins Express Wholesale Delivery</p>
+            <div className="flex items-center gap-2">
+              <h3 className="font-black text-white text-lg">Express Checkout</h3>
+              <span className="bg-emerald-400 text-slate-950 font-black text-[10px] px-2 py-0.5 rounded-full uppercase">
+                ⚡ {locationState.etaMins || 12} Mins ETA
+              </span>
+            </div>
+            <p className="text-xs text-emerald-100 font-medium">Real-Time GPS Express Delivery</p>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-200 rounded-xl transition-colors"
+            className="p-1.5 text-white/80 hover:text-white hover:bg-white/10 rounded-xl transition-colors cursor-pointer"
           >
             <X size={20} />
           </button>
@@ -169,10 +146,67 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
             </div>
           )}
 
-          {/* Customer Details */}
-          <div className="space-y-3">
+          {/* 1. Real-Time Geolocation Pin Card */}
+          <div className="bg-emerald-50/80 border-2 border-emerald-200 rounded-2xl p-4 space-y-2.5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold">
+                  <Navigation
+                    size={16}
+                    className={locationState.status === 'detecting' ? 'animate-spin' : ''}
+                  />
+                </div>
+                <div>
+                  <h4 className="font-black text-slate-900 text-xs sm:text-sm">
+                    {locationState.status === 'located'
+                      ? 'Real-Time GPS Location Active'
+                      : locationState.status === 'detecting'
+                      ? 'Detecting Real-Time Coordinates...'
+                      : 'Live Geolocation Pin'}
+                  </h4>
+                  <div className="text-[11px] text-emerald-800 font-bold flex items-center gap-1.5">
+                    <Clock size={12} className="text-emerald-600" />
+                    <span>
+                      Estimated Delivery: <b>{locationState.etaMins || 12} mins</b> (Arriving ~{' '}
+                      {locationState.etaTimeStr})
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={onRefreshLocation}
+                className="flex items-center gap-1 bg-white hover:bg-emerald-100 text-emerald-800 border border-emerald-300 text-[10px] font-black px-2.5 py-1.5 rounded-xl shadow-2xs transition-all cursor-pointer shrink-0"
+              >
+                <RotateCw
+                  size={11}
+                  className={locationState.status === 'detecting' ? 'animate-spin' : ''}
+                />
+                <span>Refresh GPS</span>
+              </button>
+            </div>
+
+            {/* GPS Accuracy & Coordinates Summary without displaying address string */}
+            <div className="pt-2 border-t border-emerald-200/60 flex items-center justify-between text-[11px] text-slate-600 font-semibold">
+              <div className="flex items-center gap-1 text-emerald-900 font-extrabold">
+                <CheckCircle2 size={13} className="text-emerald-600" />
+                <span>
+                  {locationState.coords
+                    ? `GPS Pin: ${locationState.coords.latitude.toFixed(4)}°N, ${locationState.coords.longitude.toFixed(4)}°E`
+                    : 'Real-Time Dispatch Grid Active'}
+                </span>
+              </div>
+              <span className="text-[10px] bg-emerald-200/80 text-emerald-950 font-black px-2 py-0.5 rounded-md">
+                {locationState.distanceKm ? `${locationState.distanceKm} km from Dispatch Hub` : 'Express Zone'}
+              </span>
+            </div>
+          </div>
+
+          {/* 2. Customer Contact Details */}
+          <div className="space-y-3 pt-1">
             <h4 className="font-extrabold text-xs text-slate-400 uppercase tracking-wider">
-              1. Customer Contact
+              1. Customer Contact Details
             </h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
@@ -182,7 +216,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Ramesh Kumar"
+                    placeholder="e.g. Rohith Jaya Prasad"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 focus:bg-white focus:border-emerald-500 rounded-xl text-xs font-bold outline-none"
@@ -191,7 +225,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Mobile Number</label>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Mobile Number (For Rider Updates)</label>
                 <div className="relative">
                   <Smartphone size={15} className="absolute left-3 top-2.5 text-slate-400" />
                   <input
@@ -208,63 +242,42 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
             </div>
           </div>
 
-          {/* Delivery Address */}
+          {/* 3. Door Handover Instructions (Optional notes for rider) */}
           <div className="space-y-3 pt-2 border-t border-slate-100">
-            <div className="flex items-center justify-between">
-              <h4 className="font-extrabold text-xs text-slate-400 uppercase tracking-wider">
-                2. Delivery Address in Chennai
-              </h4>
-              <button
-                type="button"
-                onClick={handleUseGPS}
-                disabled={isLocating}
-                className="flex items-center gap-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 text-[11px] font-extrabold px-2.5 py-1 rounded-lg transition-all cursor-pointer"
-              >
-                <Navigation size={12} className={isLocating ? 'animate-spin' : ''} />
-                <span>{isLocating ? 'Detecting GPS...' : 'Auto-fill GPS'}</span>
-              </button>
-            </div>
+            <h4 className="font-extrabold text-xs text-slate-400 uppercase tracking-wider">
+              2. Door Handover Note (Optional)
+            </h4>
 
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">Door / Flat No. & Street</label>
-              <input
-                type="text"
-                required
-                placeholder="e.g. Flat 3B, Sunshine Apts, 12th Cross St"
-                value={street}
-                onChange={(e) => setStreet(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 focus:bg-white focus:border-emerald-500 rounded-xl text-xs font-bold outline-none"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Area / Locality</label>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Flat / House / Floor No.
+                </label>
                 <input
                   type="text"
-                  required
-                  placeholder="e.g. Velachery, Chennai"
-                  value={area}
-                  onChange={(e) => setArea(e.target.value)}
+                  placeholder="e.g. Flat 4B, 3rd Floor"
+                  value={doorNote}
+                  onChange={(e) => setDoorNote(e.target.value)}
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-200 focus:bg-white focus:border-emerald-500 rounded-xl text-xs font-bold outline-none"
                 />
               </div>
+
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Pincode</label>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Delivery Instruction / Landmark
+                </label>
                 <input
                   type="text"
-                  required
-                  maxLength={6}
-                  placeholder="e.g. 600042"
-                  value={pincode}
-                  onChange={(e) => setPincode(e.target.value.replace(/\D/g, ''))}
+                  placeholder="e.g. Ring bell / Leave at security"
+                  value={landmark}
+                  onChange={(e) => setLandmark(e.target.value)}
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-200 focus:bg-white focus:border-emerald-500 rounded-xl text-xs font-bold outline-none"
                 />
               </div>
             </div>
           </div>
 
-          {/* Payment Method Selector */}
+          {/* 4. Payment Method Selector */}
           <div className="space-y-3 pt-2 border-t border-slate-100">
             <h4 className="font-extrabold text-xs text-slate-400 uppercase tracking-wider">
               3. Payment Method
@@ -273,7 +286,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
             <div className="space-y-2">
               {/* Google Pay Option */}
               <label
-                className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
+                className={`flex items-center gap-3 p-3 rounded-2xl border cursor-pointer transition-all ${
                   payType === 'gpay'
                     ? 'border-emerald-500 bg-emerald-50/50 shadow-xs'
                     : 'border-slate-200 bg-white hover:bg-slate-50'
@@ -289,7 +302,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 />
                 <div className="flex-1">
                   <div className="font-extrabold text-xs text-slate-900 flex items-center gap-1.5">
-                    <span>🟢 Google Pay / GPay Direct</span>
+                    <span>🟢 Google Pay Direct</span>
                     <span className="bg-emerald-600 text-white text-[9px] font-black px-1.5 py-0.2 rounded">
                       RECOMMENDED
                     </span>
@@ -302,7 +315,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
               {/* Universal UPI QR */}
               <label
-                className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
+                className={`flex items-center gap-3 p-3 rounded-2xl border cursor-pointer transition-all ${
                   payType === 'upi'
                     ? 'border-emerald-500 bg-emerald-50/50 shadow-xs'
                     : 'border-slate-200 bg-white hover:bg-slate-50'
@@ -328,7 +341,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
               {/* Cash on Delivery */}
               <label
-                className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
+                className={`flex items-center gap-3 p-3 rounded-2xl border cursor-pointer transition-all ${
                   payType === 'cod'
                     ? 'border-emerald-500 bg-emerald-50/50 shadow-xs'
                     : 'border-slate-200 bg-white hover:bg-slate-50'
@@ -355,10 +368,12 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
           </div>
 
           {/* Summary Box */}
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 flex items-center justify-between text-xs">
+          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 flex items-center justify-between text-xs">
             <div>
-              <span className="text-slate-500 font-bold">Total Bill Amount:</span>
-              <div className="text-[11px] text-slate-400">{cart.reduce((s, i) => s + i.qty, 0)} items</div>
+              <span className="text-slate-500 font-bold">Total Payable Amount:</span>
+              <div className="text-[11px] text-slate-400">
+                {cart.reduce((s, i) => s + i.qty, 0)} items · ⚡ {locationState.etaMins || 12} Mins ETA
+              </div>
             </div>
             <div className="text-right">
               <span className="text-lg font-black text-emerald-700">₹{finalTotal.toFixed(2)}</span>
@@ -369,7 +384,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-98 disabled:opacity-50 text-white font-extrabold py-3 rounded-xl shadow-md transition-all text-sm cursor-pointer"
+            className="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-98 disabled:opacity-50 text-white font-extrabold py-3.5 rounded-2xl shadow-md transition-all text-sm cursor-pointer"
           >
             {isSubmitting
               ? 'Processing Order...'
