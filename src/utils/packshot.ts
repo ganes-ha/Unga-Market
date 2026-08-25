@@ -1,10 +1,10 @@
 import { Product } from '../types';
 
-export function createProductSVG(p: Product): string {
-  const brand = (p.b || 'Unga Market').trim();
-  const name = (p.n || 'Grocery Item').trim();
-  const size = (p.s || 'Standard Pack').trim();
-  const category = (p.c || 'grocery').toLowerCase();
+export function createProductSVG(p?: Partial<Product> | null): string {
+  const brand = (p?.b || (p as any)?.brand || 'Unga Market').trim();
+  const name = (p?.n || (p as any)?.name || 'Grocery Item').trim();
+  const size = (p?.s || (p as any)?.size || 'Standard Pack').trim();
+  const category = (p?.c || (p as any)?.category || 'grocery').toLowerCase();
 
   let bgGrad1 = '#F3F4F6';
   let bgGrad2 = '#E5E7EB';
@@ -12,8 +12,8 @@ export function createProductSVG(p: Product): string {
   let accentColor = '#F26522';
   let emoji = '📦';
 
-  const bLower = brand.toLowerCase();
-  const nLower = name.toLowerCase();
+  const bLower = (brand || '').toLowerCase();
+  const nLower = (name || '').toLowerCase();
 
   if (bLower.includes('tea') || bLower.includes('tata') || bLower.includes('red label') || category.includes('tea')) {
     themeColor = '#0A6B2E';
@@ -59,6 +59,9 @@ export function createProductSVG(p: Product): string {
     emoji = '✨';
   }
 
+  const brandDisplay = (brand || 'UNGA MARKET').toUpperCase();
+  const nameDisplay = name.length > 22 ? name.substring(0, 20) + '...' : name;
+
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" width="100%" height="100%">
     <defs>
       <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -71,28 +74,28 @@ export function createProductSVG(p: Product): string {
     </defs>
     <rect width="320" height="320" rx="16" fill="url(#bg)"/>
     
-    <!-- Pack Shape -->
+    <!-- FMCG Pack Shape -->
     <g filter="url(#shadow)">
       <rect x="55" y="45" width="210" height="230" rx="18" fill="#FFFFFF" stroke="${themeColor}" stroke-width="2.5"/>
       <rect x="55" y="45" width="210" height="55" rx="18" fill="${themeColor}"/>
       <rect x="55" y="80" width="210" height="20" fill="${themeColor}"/>
       
       <!-- Brand Ribbon -->
-      <text x="160" y="78" fill="#FFFFFF" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="900" text-anchor="middle" letter-spacing="0.5">${brand.toUpperCase()}</text>
+      <text x="160" y="78" fill="#FFFFFF" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="900" text-anchor="middle" letter-spacing="0.5">${brandDisplay}</text>
       
       <!-- Center Graphic / Emoji -->
       <circle cx="160" cy="155" r="42" fill="${bgGrad1}" stroke="${accentColor}" stroke-width="2"/>
       <text x="160" y="168" font-size="34" text-anchor="middle">${emoji}</text>
       
       <!-- Product Name & Pack Size -->
-      <text x="160" y="222" fill="#111827" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="800" text-anchor="middle">${name.length > 22 ? name.substring(0, 20) + '...' : name}</text>
+      <text x="160" y="222" fill="#111827" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="800" text-anchor="middle">${nameDisplay}</text>
       <rect x="100" y="238" width="120" height="22" rx="11" fill="${bgGrad2}"/>
       <text x="160" y="253" fill="${themeColor}" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="800" text-anchor="middle">NET: ${size}</text>
     </g>
 
-    <!-- Authentic Badge -->
-    <rect x="18" y="18" width="76" height="22" rx="6" fill="${accentColor}"/>
-    <text x="56" y="33" fill="#FFFFFF" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="900" text-anchor="middle">WHOLESALE</text>
+    <!-- Fast 15 Mins Super Saver Badge -->
+    <rect x="18" y="18" width="82" height="22" rx="6" fill="${themeColor}"/>
+    <text x="59" y="33" fill="#FFFFFF" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="900" text-anchor="middle">⚡ 15 MINS</text>
   </svg>`;
 
   return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;

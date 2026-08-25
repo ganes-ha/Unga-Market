@@ -43,7 +43,7 @@ export const DeliveryPartnerPortal: React.FC<DeliveryPartnerPortalProps> = ({
       // Hub Marker (Velachery Main Hub)
       const hubIcon = L.divIcon({
         className: 'custom-hub-marker',
-        html: '<div style="background:#0F8A3E;color:#fff;font-weight:900;font-size:11px;padding:4px 8px;border-radius:12px;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.3);white-space:nowrap">🏪 Hub</div>',
+        html: '<div style="background:#0F8A3E;color:#fff;font-weight:900;font-size:11px;padding:4px 8px;border-radius:12px;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.3);white-space:nowrap">🏪 Dispatch Hub</div>',
         iconSize: [110, 30]
       });
       L.marker([12.9815, 80.2180], { icon: hubIcon }).addTo(map);
@@ -56,10 +56,11 @@ export const DeliveryPartnerPortal: React.FC<DeliveryPartnerPortalProps> = ({
       // Add simulated customer drop-off marker
       const destLat = 12.9750 + (Math.random() - 0.5) * 0.02;
       const destLng = 80.2200 + (Math.random() - 0.5) * 0.02;
+      const custName = selectedOrder.customer?.name || (typeof selectedOrder.customer === 'string' ? selectedOrder.customer : 'Customer');
 
       const custIcon = L.divIcon({
         className: 'custom-cust-marker',
-        html: `<div style="background:#F26522;color:#fff;font-weight:900;font-size:11px;padding:4px 8px;border-radius:12px;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.3);white-space:nowrap">📍 ${selectedOrder.customer.name}</div>`,
+        html: `<div style="background:#F26522;color:#fff;font-weight:900;font-size:11px;padding:4px 8px;border-radius:12px;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.3);white-space:nowrap">📍 ${custName}</div>`,
         iconSize: [120, 30]
       });
 
@@ -132,7 +133,7 @@ export const DeliveryPartnerPortal: React.FC<DeliveryPartnerPortalProps> = ({
               <div className="text-3xl mb-2">🎉</div>
               <h4 className="font-extrabold text-slate-800 text-sm">All deliveries completed!</h4>
               <p className="text-xs text-slate-500 mt-1">
-                New orders from customers will appear here automatically.
+                New wholesale orders from customers will appear here automatically.
               </p>
             </div>
           ) : (
@@ -160,23 +161,27 @@ export const DeliveryPartnerPortal: React.FC<DeliveryPartnerPortalProps> = ({
                 </div>
 
                 <div className="py-2 space-y-1 text-xs">
-                  <div className="font-extrabold text-slate-800">👤 {order.customer.name}</div>
+                  <div className="font-extrabold text-slate-800">
+                    👤 {order.customer?.name || (typeof order.customer === 'string' ? order.customer : 'Valued Customer')}
+                  </div>
                   <div className="text-slate-600 flex items-center gap-1">
                     <Phone size={12} className="text-slate-400" />
-                    <span>{order.customer.phone}</span>
+                    <span>{order.customer?.phone || (order as any).phone || 'N/A'}</span>
                   </div>
                   <div className="text-slate-600 flex items-start gap-1">
                     <MapPin size={12} className="text-slate-400 mt-0.5 flex-shrink-0" />
                     <span className="truncate">
-                      {order.customer.street}, {order.customer.area}
+                      {order.customer?.street
+                        ? `${order.customer.street}, ${order.customer.area || ''}`
+                        : (order as any).addr || 'Chennai'}
                     </span>
                   </div>
                 </div>
 
                 <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
                   <span className="font-bold text-slate-600">
-                    Collect: <b className="text-emerald-700">₹{order.total}</b> (
-                    {order.payMethod.toUpperCase()})
+                    Collect: <b className="text-emerald-700">₹{Number(order.total || 0).toFixed(2)}</b> (
+                    {(order.payMethod || (order as any).method || 'cod').toUpperCase()})
                   </span>
 
                   {order.status === 'Packed' ? (

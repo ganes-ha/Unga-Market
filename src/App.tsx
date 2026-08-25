@@ -9,28 +9,76 @@ import { CheckoutModal } from './components/CheckoutModal';
 import { UpiPaymentModal } from './components/UpiPaymentModal';
 import { ShopOwnerPortal } from './components/ShopOwnerPortal';
 import { DeliveryPartnerPortal } from './components/DeliveryPartnerPortal';
+import { AuthLoginPage } from './components/AuthLoginPage';
 import { AiRecipeModal } from './components/AiRecipeModal';
 import { VoiceModal } from './components/VoiceModal';
-
 import { TrackOrderModal } from './components/TrackOrderModal';
 import confetti from 'canvas-confetti';
-import { Sparkles, ShoppingBag, Truck, Store, Filter, Tag, CheckCircle2, ChevronRight, X } from 'lucide-react';
+import { Sparkles, ShoppingBag, Truck, Store, Filter, Tag, CheckCircle2, ChevronRight, Zap, Clock, ShieldCheck } from 'lucide-react';
 
 const CATEGORIES: Category[] = [
-  { id: 'all', name: 'All Items', emoji: '🛒' },
-  { id: 'tea', name: 'Beverages & Teas', emoji: '☕' },
-  { id: 'staples', name: 'Flour & Staples', emoji: '🌾' },
-  { id: 'oil', name: 'Edible Oils & Ghee', emoji: '🛢️' },
-  { id: 'instant', name: 'Noodles & Instant', emoji: '🍜' },
-  { id: 'clean', name: 'Soaps & Detergents', emoji: '🧼' },
-  { id: 'spices', name: 'Spices & Masalas', emoji: '🌶️' },
-  { id: 'dairy', name: 'Dairy & Milks', emoji: '🥛' }
+  { id: 'all', name: 'All Products', emoji: '🛒' },
+  { id: 'produce', name: 'Fresh Produce', emoji: '🥬' },
+  { id: 'dairy', name: 'Dairy & Bread', emoji: '🥛' },
+  { id: 'grocery', name: 'Atta, Rice & Oil', emoji: '🌾' },
+  { id: 'beverages', name: 'Tea, Coffee & Drinks', emoji: '☕' },
+  { id: 'snacks', name: 'Snacks & Munchies', emoji: '🍪' },
+  { id: 'cleaning', name: 'Cleaning & Household', emoji: '🧼' },
+  { id: 'personal', name: 'Personal Care', emoji: '🧴' }
 ];
+
+// Normalize raw orders from backend with safe fallbacks
+function normalizeOrder(raw: any): Order {
+  const cust = raw?.customer && typeof raw.customer === 'object' ? raw.customer : {};
+  const addrStr = raw?.addr || '';
+  const addrParts = addrStr.split(',');
+
+  return {
+    id: raw?.id || `UM${Math.floor(1000 + Math.random() * 9000)}`,
+    date: raw?.date || (raw?.at ? new Date(raw.at).toLocaleString('en-IN', { timeStyle: 'short', dateStyle: 'medium' }) : new Date().toLocaleTimeString()),
+    customer: {
+      name: cust.name || (typeof raw?.customer === 'string' ? raw.customer : 'Valued Customer'),
+      phone: cust.phone || raw?.phone || '9840000000',
+      street: cust.street || (addrParts[0] ? addrParts[0].trim() : 'Main Road'),
+      area: cust.area || (addrParts.length > 1 ? addrParts.slice(1).join(',').trim() : (raw?.zone || 'Chennai Hub')),
+      pincode: cust.pincode || (addrStr.match(/\d{6}/)?.[0] || '600042'),
+      landmark: cust.landmark || ''
+    },
+    items: Array.isArray(raw?.items) ? raw.items.map((it: any) => ({
+      id: it?.id || 'P1',
+      name: it?.name || it?.n || 'Product Item',
+      brand: it?.brand || it?.b || 'Unga Market',
+      size: it?.size || it?.s || 'Standard Pack',
+      qty: Number(it?.qty) || 1,
+      price: Number(it?.price ?? it?.p) || 0,
+      mrp: Number(it?.mrp ?? it?.m) || Number(it?.price ?? it?.p) || 0
+    })) : [],
+    subtotal: Number(raw?.subtotal) || 0,
+    savings: Number(raw?.savings) || 0,
+    deliveryFee: Number(raw?.deliveryFee ?? raw?.delivery) || 0,
+    discount: Number(raw?.discount) || 0,
+    couponCode: raw?.couponCode || '',
+    total: Number(raw?.total) || 0,
+    payMethod: ((raw?.payMethod || raw?.method || 'cod') as string).toLowerCase() as any,
+    status: raw?.status || 'Pending',
+    upiUtr: raw?.upiUtr || raw?.paymentId || '',
+    assignedDriver: raw?.assignedDriver || raw?.driver,
+    deliveryZone: raw?.deliveryZone || raw?.zone,
+    etaMins: raw?.etaMins || 15
+  };
+}
 
 export function App() {
   // App Navigation & Role State
-  const [activeTab, setActiveTab] = useState<'customer' | 'shopowner' | 'delivery'>('customer');
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [activeTab, setActiveTab] = useState<'customer' | 'shopowner' | 'delivery' | 'login'>('customer');
+  const [currentUser, setCurrentUser] = useState<User | null>(() => {
+    try {
+      const saved = localStorage.getItem('unga_user');
+      return saved ? JSON.parse(saved) : null;
+    } catch (e) {
+      return null;
+    }
+  });
   const [selectedHub, setSelectedHub] = useState('Velachery');
 
   // Search & Filtering State
@@ -58,6 +106,24 @@ export function App() {
   const [lastPlacedOrder, setLastPlacedOrder] = useState<Order | null>(null);
   const [trackingOrder, setTrackingOrder] = useState<Order | null>(null);
 
+  const handleLoginSuccess = (user: User, targetRole?: 'customer' | 'shopowner' | 'delivery') => {
+    setCurrentUser(user);
+    try {
+      localStorage.setItem('unga_user', JSON.stringify(user));
+    } catch (e) {}
+
+    if (targetRole === 'shopowner' || user.role === 'shopowner') {
+      setActiveTab('shopowner');
+      showToast(`Welcome ${user.name} (Shop Owner)`);
+    } else if (targetRole === 'delivery' || user.role === 'delivery') {
+      setActiveTab('delivery');
+      showToast(`Welcome ${user.name} (Delivery Partner)`);
+    } else {
+      setActiveTab('customer');
+      showToast(`Welcome back, ${user.name}!`);
+    }
+  };
+
   // Payment Settings
   const [paymentSettings, setPaymentSettings] = useState<PaymentSettings>({
     storeEmail: 'orders@ungamarket.com',
@@ -70,7 +136,7 @@ export function App() {
     bankName: 'HDFC Bank / Axis Bank',
     accountNumber: '50200012345678',
     ifscCode: 'HDFC0001234',
-    instructions: 'Direct remittance to shop owner'
+    instructions: 'Direct remittance to store owner'
   });
 
   // Modal Open States
@@ -79,7 +145,6 @@ export function App() {
   const [isUpiPayOpen, setIsUpiPayOpen] = useState(false);
   const [isAiRecipeOpen, setIsAiRecipeOpen] = useState(false);
   const [isVoiceOpen, setIsVoiceOpen] = useState(false);
-  const [isCategoriesDrawerOpen, setIsCategoriesDrawerOpen] = useState(false);
 
   // Notification Toast
   const [toastMsg, setToastMsg] = useState<{ text: string; type: 'ok' | 'err' } | null>(null);
@@ -107,7 +172,7 @@ export function App() {
       if (ordersRes && ordersRes.ok) {
         const oData = await ordersRes.json();
         if (oData.success && Array.isArray(oData.orders)) {
-          setOrders(oData.orders);
+          setOrders(oData.orders.map(normalizeOrder));
         }
       }
 
@@ -131,11 +196,11 @@ export function App() {
   // Cart Calculations
   const cartCount = useMemo(() => cart.reduce((s, i) => s + i.qty, 0), [cart]);
   const cartTotal = useMemo(
-    () => cart.reduce((s, i) => s + i.product.p * i.qty, 0),
+    () => cart.reduce((s, i) => s + (i.product?.p || 0) * i.qty, 0),
     [cart]
   );
-  const isFreeDelivery = cartTotal >= 499 || couponCode === 'FREEDEL';
-  const deliveryFee = isFreeDelivery || cartTotal === 0 ? 0 : 29;
+  const isFreeDelivery = cartTotal >= 199 || couponCode === 'FREEDEL';
+  const deliveryFee = isFreeDelivery || cartTotal === 0 ? 0 : 25;
   const finalPayTotal = Math.max(0, cartTotal - couponDiscount + deliveryFee);
 
   // Cart Handlers
@@ -173,7 +238,7 @@ export function App() {
       });
       return next;
     });
-    showToast(`Added ${items.length} AI recipe ingredients to cart! ✓`);
+    showToast(`Added ${items.length} ingredients to cart! ✓`);
     setIsCartOpen(true);
   };
 
@@ -200,7 +265,7 @@ export function App() {
     } catch (e) {}
 
     // Local fallback for offline/preview
-    const c = code.toUpperCase();
+    const c = (code || '').toUpperCase();
     if (c === 'WELCOME20') {
       setCouponCode('WELCOME20');
       setCouponDiscount(50);
@@ -254,7 +319,7 @@ export function App() {
     setIsUpiPayOpen(false);
     handleClearCart();
     confetti({ particleCount: 120, spread: 80, origin: { y: 0.5 } });
-    showToast(`🎉 Payment confirmed for Order #${orderId}! Express packing initiated.`);
+    showToast(`🎉 Payment confirmed for Order #${orderId}! Dispatch initiated in 10-15 mins.`);
     if (lastPlacedOrder) {
       setTrackingOrder(lastPlacedOrder);
     }
@@ -306,7 +371,9 @@ export function App() {
 
   const filteredProducts = useMemo(() => {
     return PRODUCTS.filter((p) => {
-      if (selectedCategory !== 'all' && p.c.toLowerCase() !== selectedCategory.toLowerCase()) {
+      const cat = (p.c || '').toLowerCase();
+      const selCat = (selectedCategory || 'all').toLowerCase();
+      if (selCat !== 'all' && cat !== selCat) {
         return false;
       }
       if (selectedBrand !== 'all' && p.b !== selectedBrand) {
@@ -315,10 +382,10 @@ export function App() {
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
         return (
-          p.n.toLowerCase().includes(q) ||
-          p.b.toLowerCase().includes(q) ||
-          p.c.toLowerCase().includes(q) ||
-          p.id.toLowerCase().includes(q)
+          (p.n || '').toLowerCase().includes(q) ||
+          (p.b || '').toLowerCase().includes(q) ||
+          (p.c || '').toLowerCase().includes(q) ||
+          (p.id || '').toLowerCase().includes(q)
         );
       }
       return true;
@@ -356,46 +423,129 @@ export function App() {
         activeTab={activeTab}
         onChangeTab={setActiveTab}
         currentUser={currentUser}
-        onOpenAuth={() => {}}
-        onLogout={() => setCurrentUser(null)}
+        onOpenAuth={() => setActiveTab('login')}
+        onLogout={() => {
+          setCurrentUser(null);
+          try {
+            localStorage.removeItem('unga_user');
+          } catch (e) {}
+          showToast('Signed out successfully');
+        }}
         selectedHub={selectedHub}
         onChangeHub={setSelectedHub}
       />
 
       {/* Main View Container */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-4 py-4">
+        {/* Auth / Login Page View */}
+        {activeTab === 'login' && (
+          <AuthLoginPage
+            onSuccessLogin={handleLoginSuccess}
+            onClose={() => setActiveTab('customer')}
+            currentUser={currentUser}
+            orders={orders}
+            onTrackOrder={(order) => {
+              setTrackingOrder(order);
+            }}
+            onLogout={() => {
+              setCurrentUser(null);
+              try {
+                localStorage.removeItem('unga_user');
+              } catch (e) {}
+              showToast('Signed out successfully');
+            }}
+          />
+        )}
+
         {/* Customer Storefront View */}
         {activeTab === 'customer' && (
           <div className="space-y-4">
-            {/* Quick Hero Banner / Highlight */}
-            <div className="bg-gradient-to-r from-emerald-800 via-emerald-700 to-teal-800 rounded-3xl p-5 sm:p-6 text-white shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
-              <div className="space-y-1.5 text-center md:text-left">
-                <div className="inline-flex items-center gap-1.5 bg-emerald-600/60 border border-emerald-400/30 text-emerald-100 text-[11px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-                  <Sparkles size={12} />
-                  <span>Direct Distributor</span>
+            {/* Blinkit-Style Festive & Express Hero Banner Showcase */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              {/* Primary Festive Banner (Inspired by Blinkit image 2) */}
+              <div className="md:col-span-2 bg-gradient-to-r from-emerald-800 via-emerald-700 to-teal-800 rounded-3xl p-5 sm:p-6 text-white shadow-xs relative overflow-hidden flex flex-col justify-between min-h-[140px]">
+                <div className="space-y-1 relative z-10">
+                  <div className="inline-flex items-center gap-1.5 bg-emerald-500 text-slate-950 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                    <Zap size={11} className="fill-current" />
+                    <span>⚡ 10–15 Mins Superfast Delivery</span>
+                  </div>
+                  <h1 className="text-xl sm:text-2xl font-black tracking-tight text-white mt-1">
+                    Supermarket Essentials at Everyday Best Prices
+                  </h1>
+                  <p className="text-xs text-emerald-100/90 max-w-lg font-medium">
+                    Farm fresh produce, dairy, staples, snacks, beverages and household essentials delivered right to your doorstep.
+                  </p>
                 </div>
-                <h1 className="text-xl sm:text-2xl font-black tracking-tight text-white">
-                  Chennai's Grocery Hub
-                </h1>
-                <p className="text-xs sm:text-sm text-emerald-100/90 max-w-xl font-medium">
-                  Flat 20% discount on Tata Tea, Maggi, Fortune Oil, Aashirvaad, Surf Excel &amp; 1,600+ brands. Free 10–15 min express doorstep delivery.
-                </p>
+
+                <div className="flex flex-wrap items-center gap-2 mt-4 relative z-10">
+                  <button
+                    type="button"
+                    onClick={() => setIsAiRecipeOpen(true)}
+                    className="bg-gradient-to-r from-orange-500 to-amber-500 hover:brightness-110 text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
+                  >
+                    <Sparkles size={14} />
+                    <span>AI Recipe-to-Cart</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedCategory('produce');
+                      setSelectedBrand('all');
+                    }}
+                    className="bg-white/15 hover:bg-white/25 text-white font-extrabold text-xs px-3.5 py-2.5 rounded-xl border border-white/20 transition-all cursor-pointer"
+                  >
+                    🥦 Fresh Produce
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedCategory('dairy');
+                      setSelectedBrand('all');
+                    }}
+                    className="bg-white/15 hover:bg-white/25 text-white font-extrabold text-xs px-3.5 py-2.5 rounded-xl border border-white/20 transition-all cursor-pointer"
+                  >
+                    🥛 Daily Dairy
+                  </button>
+                </div>
+
+                {/* Decorative background visual element */}
+                <div className="absolute -right-6 -bottom-6 w-44 h-44 bg-white/10 rounded-full blur-2xl pointer-events-none" />
               </div>
 
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setIsAiRecipeOpen(true)}
-                  className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
-                >
-                  <Sparkles size={15} />
-                  <span>AI Recipe-to-Cart</span>
-                </button>
+              {/* Quick Festive / Deals Card */}
+              <div className="bg-gradient-to-br from-amber-50 to-orange-100 border border-orange-200/80 rounded-3xl p-5 flex flex-col justify-between shadow-2xs">
+                <div>
+                  <div className="text-[10px] font-black uppercase tracking-wider text-orange-700 bg-orange-200/70 inline-block px-2 py-0.5 rounded-md">
+                    Festive Specials &amp; Sweets
+                  </div>
+                  <h3 className="font-black text-slate-900 text-base mt-2">
+                    Celebrate with Freshness &amp; Delights
+                  </h3>
+                  <p className="text-xs text-slate-600 font-semibold mt-1">
+                    Cadbury Silk, Traditional Ghee, Pure Honey, Dry Fruits &amp; Sweets.
+                  </p>
+                </div>
+
+                <div className="mt-3 flex items-center justify-between">
+                  <span className="text-[11px] font-extrabold text-orange-800">
+                    Use code <span className="underline decoration-orange-400">WELCOME20</span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedCategory('snacks');
+                      setSelectedBrand('all');
+                    }}
+                    className="bg-orange-500 hover:bg-orange-600 active:scale-95 text-white font-black text-xs px-3 py-1.5 rounded-xl shadow-xs cursor-pointer transition-all"
+                  >
+                    Explore Treats →
+                  </button>
+                </div>
               </div>
             </div>
 
             {/* Categories Carousel */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+            <div className="flex items-center gap-2 overflow-x-auto pb-1.5 scrollbar-none">
               {CATEGORIES.map((cat) => (
                 <button
                   key={cat.id}
@@ -435,7 +585,7 @@ export function App() {
 
               <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
                 <div className="text-slate-500 font-bold text-[11px]">
-                  Showing <b>{filteredProducts.length}</b> products
+                  Showing <b>{filteredProducts.length}</b> supermarket products
                 </div>
 
                 <div className="flex items-center gap-1.5">
@@ -460,7 +610,7 @@ export function App() {
                 <div className="text-4xl">🔍</div>
                 <h3 className="font-extrabold text-slate-800 text-base">No items match your search</h3>
                 <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                  Try checking spelling or reset category filters to view our full 1,600+ catalog.
+                  Try checking spelling or reset category filters to view our full supermarket catalog.
                 </p>
                 <button
                   type="button"
@@ -469,7 +619,7 @@ export function App() {
                     setSelectedCategory('all');
                     setSelectedBrand('all');
                   }}
-                  className="bg-emerald-600 text-white font-extrabold text-xs px-4 py-2 rounded-xl"
+                  className="bg-emerald-600 text-white font-extrabold text-xs px-4 py-2 rounded-xl cursor-pointer"
                 >
                   Reset All Filters
                 </button>
@@ -520,7 +670,8 @@ export function App() {
         cartCount={cartCount}
         cartTotal={cartTotal}
         onOpenCart={() => setIsCartOpen(true)}
-        onOpenCategories={() => setIsCategoriesDrawerOpen(true)}
+        onOpenCategories={() => setSelectedCategory('all')}
+        currentUser={currentUser}
       />
 
       {/* Cart Drawer */}
@@ -551,6 +702,7 @@ export function App() {
         finalTotal={finalPayTotal}
         couponCode={couponCode}
         onOrderSuccess={handleOrderSuccess}
+        currentUser={currentUser}
       />
 
       {/* UPI / GPay Dynamic QR Modal */}

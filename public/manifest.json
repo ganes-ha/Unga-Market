@@ -1,0 +1,18 @@
+{
+  "name": "Unga Market - Supermarket Essentials in 15 Minutes",
+  "short_name": "Unga Market",
+  "description": "Supermarket Essentials Delivered in 10–15 Minutes. Fresh produce, daily essentials, staples & snacks.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0F8A3E",
+  "theme_color": "#0F8A3E",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "./logo.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

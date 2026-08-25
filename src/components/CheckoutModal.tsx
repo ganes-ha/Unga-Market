@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, MapPin, Navigation, Smartphone, User, Home, ShieldCheck, Check } from 'lucide-react';
-import { CartItem } from '../types';
+import { CartItem, User as UserType } from '../types';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -12,6 +12,7 @@ interface CheckoutModalProps {
   finalTotal: number;
   couponCode?: string;
   onOrderSuccess: (orderData: any, payMethod: 'gpay' | 'upi' | 'cod') => void;
+  currentUser?: UserType | null;
 }
 
 export const CheckoutModal: React.FC<CheckoutModalProps> = ({
@@ -23,10 +24,11 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   deliveryFee,
   finalTotal,
   couponCode,
-  onOrderSuccess
+  onOrderSuccess,
+  currentUser
 }) => {
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
+  const [name, setName] = useState(currentUser?.name || '');
+  const [phone, setPhone] = useState(currentUser?.phone || '');
   const [street, setStreet] = useState('');
   const [area, setArea] = useState('Velachery, Chennai');
   const [pincode, setPincode] = useState('600042');
@@ -35,6 +37,13 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [isLocating, setIsLocating] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+
+  useEffect(() => {
+    if (currentUser) {
+      if (currentUser.name && !name) setName(currentUser.name);
+      if (currentUser.phone && !phone) setPhone(currentUser.phone);
+    }
+  }, [currentUser]);
 
   if (!isOpen) return null;
 
@@ -142,7 +151,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         <div className="bg-slate-50 border-b border-slate-200 px-5 py-4 flex items-center justify-between">
           <div>
             <h3 className="font-black text-slate-900 text-lg">Delivery & Payment</h3>
-            <p className="text-xs text-slate-500 font-medium">10–15 Mins Express Delivery</p>
+            <p className="text-xs text-slate-500 font-medium">10–15 Mins Express Wholesale Delivery</p>
           </div>
           <button
             onClick={onClose}
@@ -338,7 +347,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                     💵 Cash on Delivery (COD)
                   </div>
                   <div className="text-[11px] text-slate-500 font-medium">
-                    Pay invoice cash to delivery agent upon physical handover
+                    Pay cash to delivery partner upon order handover at your doorstep
                   </div>
                 </div>
               </label>
@@ -348,7 +357,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
           {/* Summary Box */}
           <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 flex items-center justify-between text-xs">
             <div>
-              <span className="text-slate-500 font-bold">Total Amount:</span>
+              <span className="text-slate-500 font-bold">Total Bill Amount:</span>
               <div className="text-[11px] text-slate-400">{cart.reduce((s, i) => s + i.qty, 0)} items</div>
             </div>
             <div className="text-right">

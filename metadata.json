@@ -1,0 +1,11 @@
+{
+  "name": "Unga Market",
+  "description": "Instant 10-15 minute grocery and supermarket delivery platform featuring curated daily essentials, fresh produce, dairy, staples, snacks, personal care, Google Pay, Instant UPI QR, multi-role portals, and real-time live dispatch tracking.",
+  "requestFramePermissions": [
+    "camera",
+    "geolocation"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

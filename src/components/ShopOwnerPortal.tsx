@@ -43,14 +43,19 @@ export const ShopOwnerPortal: React.FC<ShopOwnerPortalProps> = ({
   }, [isSettingsOpen, settingsForm.upiVpa, settingsForm.payeeName]);
 
   const filteredOrders = orders.filter((o) => {
-    if (filterStatus !== 'all' && o.status.toLowerCase() !== filterStatus.toLowerCase()) return false;
+    const status = o.status || 'Pending';
+    if (filterStatus !== 'all' && status.toLowerCase() !== filterStatus.toLowerCase()) return false;
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
+      const id = o.id || '';
+      const name = o.customer?.name || (typeof o.customer === 'string' ? o.customer : '');
+      const phone = o.customer?.phone || (o as any).phone || '';
+      const area = o.customer?.area || (o as any).addr || '';
       return (
-        o.id.toLowerCase().includes(q) ||
-        o.customer.name.toLowerCase().includes(q) ||
-        o.customer.phone.includes(q) ||
-        o.customer.area.toLowerCase().includes(q)
+        id.toLowerCase().includes(q) ||
+        name.toLowerCase().includes(q) ||
+        phone.includes(q) ||
+        area.toLowerCase().includes(q)
       );
     }
     return true;
@@ -89,9 +94,9 @@ export const ShopOwnerPortal: React.FC<ShopOwnerPortalProps> = ({
               <Store size={20} />
             </div>
             <div>
-              <h2 className="text-xl font-black text-slate-900">Shop Owner Operations Hub</h2>
+              <h2 className="text-xl font-black text-slate-900">Store Operations Hub</h2>
               <p className="text-xs text-slate-500 font-semibold">
-                Live Fulfillment &amp; Dispatch · Chennai Hub
+                Live Order Fulfillment &amp; 15-Min Dispatch · Chennai Hub
               </p>
             </div>
           </div>
@@ -221,13 +226,13 @@ export const ShopOwnerPortal: React.FC<ShopOwnerPortalProps> = ({
                     {order.status}
                   </span>
                   <span className="bg-slate-100 text-slate-700 text-[10px] font-extrabold px-2 py-0.5 rounded uppercase">
-                    {order.payMethod.toUpperCase()}
+                    {(order.payMethod || (order as any).method || 'cod').toUpperCase()}
                   </span>
                 </div>
 
                 <div className="flex items-center gap-3">
                   <span className="text-xs font-bold text-slate-500">
-                    Total: <b className="text-emerald-700 text-sm">₹{Number(order.total).toFixed(2)}</b>
+                    Total: <b className="text-emerald-700 text-sm">₹{Number(order.total || 0).toFixed(2)}</b>
                   </span>
 
                   {/* Status Action Buttons */}
@@ -265,16 +270,18 @@ export const ShopOwnerPortal: React.FC<ShopOwnerPortalProps> = ({
                 {/* Customer Details */}
                 <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 space-y-1">
                   <div className="font-extrabold text-slate-800 flex items-center gap-1">
-                    <span>👤 {order.customer.name}</span>
+                    <span>👤 {order.customer?.name || (typeof order.customer === 'string' ? order.customer : 'Valued Customer')}</span>
                   </div>
                   <div className="text-slate-600 flex items-center gap-1">
                     <Phone size={12} className="text-slate-400" />
-                    <span>{order.customer.phone}</span>
+                    <span>{order.customer?.phone || (order as any).phone || 'N/A'}</span>
                   </div>
                   <div className="text-slate-600 flex items-start gap-1">
                     <MapPin size={12} className="text-slate-400 mt-0.5 flex-shrink-0" />
                     <span>
-                      {order.customer.street}, {order.customer.area} - {order.customer.pincode}
+                      {order.customer?.street
+                        ? `${order.customer.street}, ${order.customer.area || ''} ${order.customer.pincode ? '- ' + order.customer.pincode : ''}`
+                        : (order as any).addr || 'Chennai Distribution Area'}
                     </span>
                   </div>
                 </div>
@@ -282,15 +289,15 @@ export const ShopOwnerPortal: React.FC<ShopOwnerPortalProps> = ({
                 {/* Items Summary */}
                 <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 space-y-1 md:col-span-2">
                   <div className="font-extrabold text-slate-800 mb-1">
-                    Items ({order.items.reduce((s, i) => s + i.qty, 0)} units):
+                    Items ({(order.items || []).reduce((s, i) => s + (Number(i.qty) || 1), 0)} units):
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 max-h-24 overflow-y-auto">
-                    {order.items.map((it, idx) => (
+                    {(order.items || []).map((it, idx) => (
                       <div key={idx} className="flex justify-between text-slate-700 font-medium">
                         <span className="truncate pr-2">
-                          {it.qty}x {it.brand} {it.name} ({it.size})
+                          {it.qty || 1}x {it.brand || ''} {it.name || (it as any).n || 'Item'} ({it.size || (it as any).s || 'Standard'})
                         </span>
-                        <span className="font-bold text-slate-900">₹{it.price * it.qty}</span>
+                        <span className="font-bold text-slate-900">₹{(Number(it.price || (it as any).p) || 0) * (Number(it.qty) || 1)}</span>
                       </div>
                     ))}
                   </div>

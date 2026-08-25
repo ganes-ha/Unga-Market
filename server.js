@@ -10,7 +10,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = 3000;
 const HOST = '0.0.0.0';
 
 app.use(cors());
@@ -177,85 +177,126 @@ function createAuthenticPackshotSVG(p) {
     </g>
 
     <!-- Top Badge -->
-    <rect x="12" y="12" width="105" height="22" rx="6" fill="rgba(15,138,62,0.12)" />
-    <text x="64" y="27" font-family="system-ui, sans-serif" font-weight="800" font-size="10" fill="#0F8A3E" text-anchor="middle">⚡ UNGA PACKSHOT</text>
+    <rect x="12" y="12" width="80" height="22" rx="6" fill="#0F8A3E" />
+    <text x="52" y="27" font-family="system-ui, sans-serif" font-weight="900" font-size="10" fill="#FFFFFF" text-anchor="middle">⚡ 15 MINS</text>
   </svg>
   `.trim();
 
   return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 }
 
-// In-memory persistent store for wholesale orders
+// In-memory persistent store for orders
 let ordersList = [
   {
     id: 'UM8921A',
     at: Date.now() - 1000 * 60 * 45, // 45 mins ago
-    customer: { name: 'Karthik Raja', phone: '9840123456', email: 'karthik@gmail.com' },
+    date: new Date(Date.now() - 1000 * 60 * 45).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    customer: {
+      name: 'Karthik Raja',
+      phone: '9840123456',
+      email: 'karthik@gmail.com',
+      street: 'Plot 42, Annai Nagar 2nd Street',
+      area: 'Velachery',
+      pincode: '600042'
+    },
     addr: 'Plot 42, Annai Nagar 2nd Street, Velachery, Chennai - 600042',
     phone: '9840123456',
     items: [
-      { id: 'FMCG50001', name: 'Tata Tea Gold Leaf Tea', brand: 'Tata Tea', size: '500g', qty: 2, price: 236 },
-      { id: 'FMCG50012', name: 'Maggi 2-Minute Masala Noodles 12-Pack', brand: 'Nestle', size: '840g', qty: 1, price: 156 },
-      { id: 'FMCG50035', name: 'Surf Excel Quick Wash Detergent Powder', brand: 'Surf Excel', size: '1kg', qty: 1, price: 168 }
+      { id: 'UM401', name: 'Tata Tea Gold Rich Taste & Aroma', brand: 'Tata Tea', size: '500 g', qty: 2, price: 256, mrp: 320 },
+      { id: 'UM501', name: 'Maggi 2-Minute Masala Instant Noodles', brand: 'Nestle', size: '4 Pack (280 g)', qty: 1, price: 52, mrp: 60 },
+      { id: 'UM601', name: 'Surf Excel Matic Top Load Liquid Detergent', brand: 'Surf Excel', size: '1 L Pouch', qty: 1, price: 188, mrp: 230 }
     ],
-    subtotal: 796,
+    subtotal: 752,
+    savings: 178,
     delivery: 0,
+    deliveryFee: 0,
+    discount: 0,
     tip: 20,
-    total: 816,
+    total: 772,
     method: 'gpay',
+    payMethod: 'gpay',
     paymentId: 'UPI_98401GPAY224',
     status: 'Packed',
     driver: { name: 'Murugan V. (Fleet)', phone: '9876500112', vehicle: 'TN-07-CS-4421' },
+    assignedDriver: { name: 'Murugan V. (Fleet)', phone: '9876500112', vehicle: 'TN-07-CS-4421' },
     zone: 'Velachery Hub',
+    deliveryZone: 'Velachery Hub',
     timeline: [
-      { status: 'Pending', at: Date.now() - 1000 * 60 * 45, note: 'Order placed & paid via Google Pay (₹816.00 with ₹20 Driver Tip)' },
+      { status: 'Pending', at: Date.now() - 1000 * 60 * 45, note: 'Order placed & paid via Google Pay (₹772.00 with ₹20 Driver Tip)' },
       { status: 'Packed', at: Date.now() - 1000 * 60 * 20, note: 'Quality checked and packed at Unga Market Hub' }
     ]
   },
   {
     id: 'UM7732B',
     at: Date.now() - 1000 * 60 * 120, // 2 hours ago
-    customer: { name: 'Priya Sundaram', phone: '9790234567', email: 'priya.s@gmail.com' },
+    date: new Date(Date.now() - 1000 * 60 * 120).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    customer: {
+      name: 'Priya Sundaram',
+      phone: '9790234567',
+      email: 'priya.s@gmail.com',
+      street: 'Flat 3B, Green Paradise Apts',
+      area: 'OMR Thoraipakkam',
+      pincode: '600097'
+    },
     addr: 'Flat 3B, Green Paradise Apts, OMR Thoraipakkam, Chennai - 600097',
     phone: '9790234567',
     items: [
-      { id: 'FMCG50006', name: 'Horlicks Classic Malt Health Drink', brand: 'Horlicks', size: '1kg', qty: 1, price: 348 },
-      { id: 'FMCG50027', name: 'Colgate Strong Teeth Toothpaste Twin Pack', brand: 'Colgate', size: '500g', qty: 2, price: 184 }
+      { id: 'UM407', name: 'Boost Secret of Energy Malt Health Drink', brand: 'Boost', size: '500 g Refill', qty: 1, price: 245, mrp: 290 },
+      { id: 'UM703', name: 'Colgate Strong Teeth Calcium Anticavity Paste', brand: 'Colgate', size: '200 g Pack', qty: 2, price: 102, mrp: 125 }
     ],
-    subtotal: 716,
+    subtotal: 449,
+    savings: 91,
     delivery: 0,
+    deliveryFee: 0,
+    discount: 0,
     tip: 30,
-    total: 746,
+    total: 479,
     method: 'upi',
+    payMethod: 'upi',
     paymentId: 'UPI_REF892348911',
     status: 'Shipped',
     driver: { name: 'Murugan V. (Fleet)', phone: '9876500112', vehicle: 'TN-07-CS-4421' },
+    assignedDriver: { name: 'Murugan V. (Fleet)', phone: '9876500112', vehicle: 'TN-07-CS-4421' },
     zone: 'OMR - Thoraipakkam',
+    deliveryZone: 'OMR - Thoraipakkam',
     timeline: [
       { status: 'Pending', at: Date.now() - 1000 * 60 * 120, note: 'Order received & verified with instant UPI' },
-      { status: 'Packed', at: Date.now() - 1000 * 60 * 85, note: 'Packaged in eco-safe crate' },
+      { status: 'Packed', at: Date.now() - 1000 * 60 * 85, note: 'Packaged in eco-safe grocery crate' },
       { status: 'Shipped', at: Date.now() - 1000 * 60 * 30, note: 'Out for delivery with driver Murugan V.' }
     ]
   },
   {
     id: 'UM6421C',
     at: Date.now() - 1000 * 60 * 180,
-    customer: { name: 'Venkatesh S.', phone: '9841199882', email: 'venkat@gmail.com' },
+    date: new Date(Date.now() - 1000 * 60 * 180).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    customer: {
+      name: 'Venkatesh S.',
+      phone: '9841199882',
+      email: 'venkat@gmail.com',
+      street: 'Door 18, 1st Cross Street, Gandhi Nagar',
+      area: 'Adyar',
+      pincode: '600020'
+    },
     addr: 'Door 18, 1st Cross Street, Gandhi Nagar, Adyar, Chennai - 600020',
     phone: '9841199882',
     items: [
-      { id: 'FMCG50042', name: 'Dove Cream Beauty Bathing Bar (Pack of 3)', brand: 'Dove', size: '300g', qty: 2, price: 172 },
-      { id: 'FMCG50002', name: 'Tata Tea Gold Leaf Tea', brand: 'Tata Tea', size: '500g', qty: 1, price: 256 }
+      { id: 'UM701', name: 'Dettol Original Germ Protection Bathing Soap', brand: 'Dettol', size: '4 x 125 g (Save Pack)', qty: 2, price: 180, mrp: 215 },
+      { id: 'UM401', name: 'Tata Tea Gold Rich Taste & Aroma', brand: 'Tata Tea', size: '500 g', qty: 1, price: 256, mrp: 320 }
     ],
-    subtotal: 600,
+    subtotal: 616,
+    savings: 134,
     delivery: 0,
+    deliveryFee: 0,
+    discount: 0,
     tip: 10,
-    total: 610,
+    total: 626,
     method: 'cod',
+    payMethod: 'cod',
     paymentId: 'COD_READY',
     status: 'Pending',
     driver: null,
     zone: 'Adyar - Besant Nagar',
+    deliveryZone: 'Adyar - Besant Nagar',
     timeline: [
       { status: 'Pending', at: Date.now() - 1000 * 60 * 180, note: 'Cash on Delivery order registered' }
     ]
@@ -368,7 +409,7 @@ app.post('/api/generate-product-image', async (req, res) => {
     const ai = getAIClient();
     if (ai && process.env.GEMINI_API_KEY) {
       try {
-        const prompt = `Authentic studio packshot photograph of ${brand || ''} ${name || ''} ${size || ''}, authentic consumer packaging product in India, perfectly centered on a clean white background, high quality lighting, sharp details, 8k resolution.`;
+        const prompt = `Authentic studio packshot photograph of ${brand || ''} ${name || ''} ${size || ''}, authentic consumer packaging FMCG product in India, perfectly centered on a clean white background, high quality lighting, sharp details, 8k resolution.`;
         
         const response = await ai.models.generateContent({
           model: 'gemini-3.1-flash-lite-image',
@@ -431,7 +472,7 @@ app.post('/api/auth/login', (req, res) => {
           name: name || 'Shop Owner (Admin)',
           email: identifier || shopOwnerPaymentSettings.storeEmail || 'orders@ungamarket.com',
           phone: phone || shopOwnerPaymentSettings.gpayPhone || '9840000001',
-          store: 'Unga Market Hub - Chennai'
+          store: 'Unga Market Wholesale Hub - Chennai'
         }
       });
     } else {
@@ -561,7 +602,7 @@ app.post('/api/create-upi-qr', async (req, res) => {
     const upiPayeeName = shopOwnerPaymentSettings.payeeName || 'Jay Prathap';
     const gpayPhone = shopOwnerPaymentSettings.gpayPhone || '9840123456';
     const phonepeNumber = shopOwnerPaymentSettings.phonepeNumber || '9840123456';
-    const cleanNote = String(note || (orderId ? `Order ${orderId}` : 'Payment')).trim().substring(0, 40);
+    const cleanNote = String(note || (orderId ? `Order ${orderId}` : 'Wholesale Payment')).trim().substring(0, 40);
     const txNote = encodeURIComponent(cleanNote);
     const encodedName = encodeURIComponent(upiPayeeName);
     const formattedAmount = amount ? Number(amount).toFixed(2) : null;
@@ -715,7 +756,7 @@ app.patch('/api/orders/:id/status', (req, res) => {
     if (!order.timeline) order.timeline = [];
     
     let defaultNote = '';
-    if (status === 'Packed') defaultNote = 'Order packed & verified at distribution hub';
+    if (status === 'Packed') defaultNote = 'Order packed & verified at wholesale distribution hub';
     else if (status === 'Shipped') defaultNote = 'Dispatched and out for delivery with partner';
     else if (status === 'Delivered') defaultNote = 'Delivered to customer address. Order completed ✓';
 
@@ -786,7 +827,7 @@ app.get('/api/delivery-clusters', (req, res) => {
       busiestZoneCount: busiest ? busiest.activeOrdersCount : 0,
       activeFleetDrivers: 4,
       avgDeliveryTimeMins: 14,
-      hubLocation: 'Unga Market Central Distribution Hub, Velachery Main Rd, Chennai'
+      hubLocation: 'Unga Market Central Wholesale Distribution Hub, Velachery Main Rd, Chennai'
     }
   });
 });
@@ -825,7 +866,7 @@ app.post('/api/products', (req, res) => {
     };
 
     dynamicProductModifications.set(id, newProd);
-    res.json({ success: true, product: newProd, message: 'Product added to catalog' });
+    res.json({ success: true, product: newProd, message: 'Product added to wholesale catalog' });
   } catch (err) {
     console.error('Error adding product:', err);
     res.status(500).json({ success: false, error: 'Failed to add product' });
@@ -917,7 +958,7 @@ app.post('/api/apply-coupon', (req, res) => {
       success: true,
       code: 'SUPER20',
       discount,
-      message: `✨ SUPER20 applied! 20% Extra Cashback (Saved ₹${discount})!`
+      message: `✨ SUPER20 applied! 20% Extra Wholesale Cashback (Saved ₹${discount})!`
     });
   }
 

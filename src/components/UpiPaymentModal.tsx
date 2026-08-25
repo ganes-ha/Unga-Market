@@ -115,9 +115,9 @@ export const UpiPaymentModal: React.FC<UpiPaymentModalProps> = ({
             {/* Payee Profile Header */}
             <div className="flex items-center justify-center gap-2.5 mb-3">
               <div className="w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center font-black text-sm">
-                {payeeName.charAt(0).toUpperCase()}
+                {(payeeName || 'U').charAt(0).toUpperCase()}
               </div>
-              <div className="font-black text-slate-800 text-base">{payeeName}</div>
+              <div className="font-black text-slate-800 text-base">{payeeName || 'Unga Market'}</div>
             </div>
 
             {/* QR Container with center emblem */}

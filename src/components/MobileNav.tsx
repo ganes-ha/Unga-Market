@@ -1,13 +1,15 @@
 import React from 'react';
-import { Home, Grid, ShoppingBag, Truck, Store } from 'lucide-react';
+import { Home, Grid, ShoppingBag, Truck, Store, User } from 'lucide-react';
+import { User as UserType } from '../types';
 
 interface MobileNavProps {
-  activeTab: 'customer' | 'shopowner' | 'delivery';
-  onChangeTab: (tab: 'customer' | 'shopowner' | 'delivery') => void;
+  activeTab: 'customer' | 'shopowner' | 'delivery' | 'login';
+  onChangeTab: (tab: 'customer' | 'shopowner' | 'delivery' | 'login') => void;
   cartCount: number;
   cartTotal: number;
   onOpenCart: () => void;
   onOpenCategories: () => void;
+  currentUser: UserType | null;
 }
 
 export const MobileNav: React.FC<MobileNavProps> = ({
@@ -16,7 +18,8 @@ export const MobileNav: React.FC<MobileNavProps> = ({
   cartCount,
   cartTotal,
   onOpenCart,
-  onOpenCategories
+  onOpenCategories,
+  currentUser
 }) => {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-white/95 backdrop-blur-md border-t border-slate-200 safe-bottom shadow-lg">
@@ -24,7 +27,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({
         {/* Storefront Home */}
         <button
           onClick={() => onChangeTab('customer')}
-          className={`flex flex-col items-center justify-center gap-1 ${
+          className={`flex flex-col items-center justify-center gap-1 cursor-pointer ${
             activeTab === 'customer' ? 'text-emerald-700 font-extrabold' : 'text-slate-500 font-medium'
           }`}
         >
@@ -35,7 +38,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({
         {/* Categories Jump */}
         <button
           onClick={onOpenCategories}
-          className="flex flex-col items-center justify-center gap-1 text-slate-500 font-medium hover:text-emerald-700"
+          className="flex flex-col items-center justify-center gap-1 text-slate-500 font-medium hover:text-emerald-700 cursor-pointer"
         >
           <Grid size={19} strokeWidth={2} />
           <span className="text-[10px]">Categories</span>
@@ -44,7 +47,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({
         {/* Cart Drawer Button */}
         <button
           onClick={onOpenCart}
-          className="flex flex-col items-center justify-center gap-1 text-emerald-700 font-bold relative"
+          className="flex flex-col items-center justify-center gap-1 text-emerald-700 font-bold relative cursor-pointer"
         >
           <div className="relative">
             <ShoppingBag size={20} strokeWidth={2.5} />
@@ -57,28 +60,29 @@ export const MobileNav: React.FC<MobileNavProps> = ({
           <span className="text-[10px]">Cart (₹{cartTotal.toFixed(0)})</span>
         </button>
 
-        {/* Shop Owner Portal */}
+        {/* Portals or Login Button */}
         <button
           onClick={() => onChangeTab(activeTab === 'shopowner' ? 'customer' : 'shopowner')}
-          className={`flex flex-col items-center justify-center gap-1 ${
+          className={`flex flex-col items-center justify-center gap-1 cursor-pointer ${
             activeTab === 'shopowner' ? 'text-emerald-700 font-extrabold' : 'text-slate-500 font-medium'
           }`}
         >
           <Store size={19} strokeWidth={activeTab === 'shopowner' ? 2.5 : 2} />
-          <span className="text-[10px]">Shop Owner</span>
+          <span className="text-[10px]">Merchant</span>
         </button>
 
-        {/* Rider / Delivery Portal */}
+        {/* User Login / Profile */}
         <button
-          onClick={() => onChangeTab(activeTab === 'delivery' ? 'customer' : 'delivery')}
-          className={`flex flex-col items-center justify-center gap-1 ${
-            activeTab === 'delivery' ? 'text-emerald-700 font-extrabold' : 'text-slate-500 font-medium'
+          onClick={() => onChangeTab(activeTab === 'login' ? 'customer' : 'login')}
+          className={`flex flex-col items-center justify-center gap-1 cursor-pointer ${
+            activeTab === 'login' ? 'text-emerald-700 font-extrabold' : 'text-slate-500 font-medium'
           }`}
         >
-          <Truck size={19} strokeWidth={activeTab === 'delivery' ? 2.5 : 2} />
-          <span className="text-[10px]">Rider App</span>
+          <User size={19} strokeWidth={activeTab === 'login' ? 2.5 : 2} />
+          <span className="text-[10px]">{currentUser ? currentUser.name.split(' ')[0] : 'Sign In'}</span>
         </button>
       </div>
     </nav>
   );
 };
+

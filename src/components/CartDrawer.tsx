@@ -36,14 +36,14 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
 
   const totalMrp = cart.reduce((sum, item) => sum + item.product.m * item.qty, 0);
   const subtotal = cart.reduce((sum, item) => sum + item.product.p * item.qty, 0);
-  const wholesaleSavings = totalMrp - subtotal;
-  const isFreeDelivery = subtotal >= 499 || couponCode === 'FREEDEL';
-  const deliveryFee = isFreeDelivery || subtotal === 0 ? 0 : 29;
+  const itemSavings = totalMrp - subtotal;
+  const isFreeDelivery = subtotal >= 199 || couponCode === 'FREEDEL';
+  const deliveryFee = isFreeDelivery || subtotal === 0 ? 0 : 25;
   const finalTotal = Math.max(0, subtotal - couponDiscount + deliveryFee);
-  const totalCombinedSavings = wholesaleSavings + couponDiscount + (deliveryFee === 0 && subtotal > 0 ? 29 : 0);
+  const totalCombinedSavings = itemSavings + couponDiscount + (deliveryFee === 0 && subtotal > 0 ? 25 : 0);
 
   const handleApply = async (codeToApply?: string) => {
-    const code = (codeToApply || couponInput).trim().toUpperCase();
+    const code = (codeToApply || couponInput || '').trim().toUpperCase();
     if (!code) return;
     setCouponLoading(true);
     setCouponMsg(null);
@@ -71,18 +71,18 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
           <div className="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
             <div>
               <h3 className="font-extrabold text-slate-900 text-lg flex items-center gap-2">
-                <span>Cart</span>
+                <span>My Cart</span>
                 <span className="bg-emerald-100 text-emerald-800 text-xs font-black px-2 py-0.5 rounded-full">
                   {cart.reduce((s, i) => s + i.qty, 0)} items
                 </span>
               </h3>
               <p className="text-xs text-slate-500 font-medium">
-                Flat 20% Direct from Distributor
+                ⚡ Delivered in 10-15 Mins · Unga Market
               </p>
             </div>
             <button
               onClick={onClose}
-              className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-200 rounded-xl transition-colors"
+              className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-200 rounded-xl transition-colors cursor-pointer"
             >
               <X size={20} />
             </button>
@@ -93,14 +93,14 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
             <div className="flex items-center justify-between text-xs font-bold text-emerald-900 mb-1.5">
               <span className="flex items-center gap-1">
                 <Truck size={14} className="text-emerald-600" />
-                {subtotal >= 499 ? '🎉 Free Delivery Unlocked!' : `Add ₹${(499 - subtotal).toFixed(0)} more for Free Delivery`}
+                {subtotal >= 199 ? '🎉 Free Delivery Unlocked!' : `Add ₹${(199 - subtotal).toFixed(0)} more for Free Delivery`}
               </span>
-              <span>₹499 Target</span>
+              <span>₹199 Free Delivery</span>
             </div>
             <div className="w-full bg-emerald-200 h-2 rounded-full overflow-hidden">
               <div
                 className="bg-emerald-600 h-full rounded-full transition-all duration-300"
-                style={{ width: `${Math.min(100, (subtotal / 499) * 100)}%` }}
+                style={{ width: `${Math.min(100, (subtotal / 199) * 100)}%` }}
               />
             </div>
           </div>
@@ -114,11 +114,11 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 </div>
                 <h4 className="font-extrabold text-slate-800 text-base mb-1">Your cart is empty</h4>
                 <p className="text-xs text-slate-500 max-w-xs mb-4">
-                  Add genuine essentials from our catalog at 20% flat discount.
+                  Add fresh produce, dairy, grocery, and snacks to your cart for 15-minute delivery.
                 </p>
                 <button
                   onClick={onClose}
-                  className="bg-emerald-600 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-xs hover:bg-emerald-700"
+                  className="bg-emerald-600 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-xs hover:bg-emerald-700 cursor-pointer"
                 >
                   Browse Store
                 </button>
@@ -247,8 +247,8 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                   <span className="line-through text-slate-400">₹{totalMrp.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between font-semibold text-emerald-700">
-                  <span>Discount (20%):</span>
-                  <span>-₹{wholesaleSavings.toFixed(2)}</span>
+                  <span>Product Discount:</span>
+                  <span>-₹{itemSavings.toFixed(2)}</span>
                 </div>
                 {couponDiscount > 0 && (
                   <div className="flex justify-between font-semibold text-emerald-700">
@@ -257,7 +257,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                   </div>
                 )}
                 <div className="flex justify-between">
-                  <span>Delivery Fee (Chennai Express):</span>
+                  <span>Delivery Partner Fee (15 Mins):</span>
                   <span>{deliveryFee === 0 ? <b className="text-emerald-700">FREE</b> : `₹${deliveryFee}`}</span>
                 </div>
                 <div className="flex justify-between items-baseline pt-2 border-t border-slate-200 font-extrabold text-sm text-slate-900">

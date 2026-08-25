@@ -22,7 +22,8 @@ export const TrackOrderModal: React.FC<TrackOrderModalProps> = ({
     { status: 'Delivered', label: 'Delivered', desc: 'Handover complete', icon: CheckCircle }
   ];
 
-  const currentIdx = steps.findIndex((s) => s.status.toLowerCase() === order.status.toLowerCase());
+  const orderStatus = order.status || 'Pending';
+  const currentIdx = steps.findIndex((s) => s.status.toLowerCase() === orderStatus.toLowerCase());
   const activeIdx = currentIdx >= 0 ? currentIdx : 0;
 
   return (
@@ -94,20 +95,26 @@ export const TrackOrderModal: React.FC<TrackOrderModalProps> = ({
             <div className="flex justify-between">
               <span className="text-slate-500 font-bold">Delivery Address:</span>
               <span className="font-extrabold text-slate-800 text-right">
-                {order.customer.street}, {order.customer.area}
+                {order.customer?.street
+                  ? `${order.customer.street}, ${order.customer.area || ''}`
+                  : (order as any).addr || 'Chennai'}
               </span>
             </div>
             <div className="flex justify-between">
               <span className="text-slate-500 font-bold">Customer Phone:</span>
-              <span className="font-extrabold text-slate-800">{order.customer.phone}</span>
+              <span className="font-extrabold text-slate-800">
+                {order.customer?.phone || (order as any).phone || 'N/A'}
+              </span>
             </div>
             <div className="flex justify-between">
               <span className="text-slate-500 font-bold">Payment Mode:</span>
-              <span className="font-extrabold text-emerald-700 uppercase">{order.payMethod}</span>
+              <span className="font-extrabold text-emerald-700 uppercase">
+                {(order.payMethod || (order as any).method || 'cod').toUpperCase()}
+              </span>
             </div>
             <div className="flex justify-between pt-2 border-t border-slate-200 text-sm">
               <span className="font-black text-slate-900">Total Invoice Amount:</span>
-              <span className="font-black text-emerald-700">₹{order.total}</span>
+              <span className="font-black text-emerald-700">₹{Number(order.total || 0).toFixed(2)}</span>
             </div>
           </div>
 
