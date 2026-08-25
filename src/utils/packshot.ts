@@ -129,9 +129,9 @@ export function createProductSVG(p?: Partial<Product> | null): string {
       <text x="160" y="253" fill="${themeColor}" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="800" text-anchor="middle">NET: ${size}</text>
     </g>
 
-    <!-- Fast 15 Mins Super Saver Badge -->
-    <rect x="18" y="18" width="82" height="22" rx="6" fill="${themeColor}"/>
-    <text x="59" y="33" fill="#FFFFFF" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="900" text-anchor="middle">⚡ 15 MINS</text>
+    <!-- Net Weight Badge -->
+    <rect x="18" y="18" width="90" height="22" rx="6" fill="${themeColor}"/>
+    <text x="63" y="33" fill="#FFFFFF" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="900" text-anchor="middle">ORIGINAL PACK</text>
   </svg>`;
 
   return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
