@@ -81,7 +81,7 @@ export const AiRecipeModal: React.FC<AiRecipeModalProps> = ({
         const sampleMatches = products.slice(0, 3).map((p) => ({ product: p, qty: 1 }));
         setResult({
           title: query,
-          description: 'Recipe essentials delivered in 10-15 minutes',
+          description: 'Recipe essentials delivered to your doorstep',
           steps: [
             'Prepare all fresh produce and authentic ingredients.',
             'Follow traditional culinary proportions for best aroma.',
@@ -95,7 +95,7 @@ export const AiRecipeModal: React.FC<AiRecipeModalProps> = ({
       const sampleMatches = products.slice(0, 3).map((p) => ({ product: p, qty: 1 }));
       setResult({
         title: query,
-        description: 'Recipe essentials delivered in 10-15 minutes',
+        description: 'Recipe essentials delivered to your doorstep',
         steps: ['Combine ingredients and cook to perfection.'],
         items: sampleMatches
       });

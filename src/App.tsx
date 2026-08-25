@@ -70,8 +70,8 @@ function normalizeOrder(raw: any): Order {
 }
 
 export function App() {
-  // App Navigation & Role State
-  const [activeTab, setActiveTab] = useState<'customer' | 'shopowner' | 'delivery' | 'login'>('customer');
+  // App Navigation & Role State (Defaults to 'login' for 'Welcome to Unga Market' initial page)
+  const [activeTab, setActiveTab] = useState<'customer' | 'shopowner' | 'delivery' | 'login'>('login');
   const [currentUser, setCurrentUser] = useState<User | null>(() => {
     try {
       const saved = localStorage.getItem('unga_user');
@@ -349,7 +349,7 @@ export function App() {
     setIsUpiPayOpen(false);
     handleClearCart();
     confetti({ particleCount: 120, spread: 80, origin: { y: 0.5 } });
-    showToast(`🎉 Payment confirmed for Order #${orderId}! Dispatch initiated in 10-15 mins.`);
+    showToast(`🎉 Payment confirmed for Order #${orderId}! Dispatch initiated.`);
     if (lastPlacedOrder) {
       setTrackingOrder(lastPlacedOrder);
     }

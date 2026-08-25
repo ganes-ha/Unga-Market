@@ -97,8 +97,8 @@ export const UpiPaymentModal: React.FC<UpiPaymentModalProps> = ({
         {/* Header */}
         <div className="bg-emerald-700 px-5 py-3.5 flex items-center justify-between text-white">
           <div className="flex items-center gap-2">
-            <span className="text-lg">⚡</span>
-            <h3 className="font-extrabold text-sm text-white">Instant UPI / Google Pay</h3>
+            <span className="text-lg">💳</span>
+            <h3 className="font-extrabold text-sm text-white">UPI Payment</h3>
           </div>
           <button
             onClick={onClose}

@@ -88,7 +88,7 @@ export const DeliveryPartnerPortal: React.FC<DeliveryPartnerPortalProps> = ({
           <div>
             <h2 className="text-xl font-black text-slate-900">Rider Express Dispatch</h2>
             <p className="text-xs text-slate-500 font-semibold">
-              Rider ID: RD-409 · Velachery / OMR Zone · 10-15m Express
+              Rider ID: RD-409 · Express Delivery Fleet
             </p>
           </div>
         </div>

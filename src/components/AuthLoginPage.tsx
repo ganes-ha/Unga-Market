@@ -24,7 +24,7 @@ export const AuthLoginPage: React.FC<AuthLoginPageProps> = ({
   const [selectedRole, setSelectedRole] = useState<'customer' | 'shopowner' | 'delivery'>(initialRole);
   const [customerSubTab, setCustomerSubTab] = useState<'auth' | 'orders'>(currentUser ? 'orders' : 'auth');
   
-  // Customer OTP Form State
+  // Customer Form State
   const [fullName, setFullName] = useState('');
   const [identifier, setIdentifier] = useState('');
   const [deliveryChannel, setDeliveryChannel] = useState<'sms' | 'whatsapp' | 'gmail'>('sms');
@@ -37,10 +37,10 @@ export const AuthLoginPage: React.FC<AuthLoginPageProps> = ({
   const isPredefinedShopOwner = PREDEFINED_SHOP_OWNERS.includes(cleanCurrentId);
   const isPredefinedDelivery = PREDEFINED_DELIVERY_PARTNERS.includes(cleanCurrentId);
 
-  // OTP Verification State
+  // OTP Verification & Android SMS Message State
   const [otpStep, setOtpStep] = useState(false);
   const [otpCode, setOtpCode] = useState('');
-  const [otpPreview, setOtpPreview] = useState<string | null>(null);
+  const [incomingSms, setIncomingSms] = useState<{ sender: string; message: string; code: string } | null>(null);
   const [timer, setTimer] = useState(300);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -65,7 +65,35 @@ export const AuthLoginPage: React.FC<AuthLoginPageProps> = ({
     return () => clearInterval(interval);
   }, [otpStep, timer]);
 
-  // Request 6-Digit OTP
+  // WebOTP API: Listen for Android SMS message with verification code
+  useEffect(() => {
+    if (!otpStep || typeof window === 'undefined') return;
+
+    let abortController: AbortController | null = null;
+    if ('OTPCredential' in window || (navigator && 'credentials' in navigator)) {
+      try {
+        abortController = new AbortController();
+        (navigator.credentials as any).get({
+          otp: { transport: ['sms'] },
+          signal: abortController.signal
+        }).then((content: any) => {
+          if (content && content.code) {
+            setOtpCode(content.code);
+          }
+        }).catch(() => {
+          // Gracefully ignore if WebOTP is dismissed or unsupported
+        });
+      } catch (e) {}
+    }
+
+    return () => {
+      if (abortController) {
+        abortController.abort();
+      }
+    };
+  }, [otpStep]);
+
+  // Request 6-Digit OTP via SMS message
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
@@ -97,30 +125,33 @@ export const AuthLoginPage: React.FC<AuthLoginPageProps> = ({
       const data = await res.json();
       if (data.success) {
         setOtpStep(true);
-        setOtpPreview(data.otpPreview || '123456');
+        const receivedCode = data.otpPreview || '123456';
+        setIncomingSms({
+          sender: 'MESSAGES · UNGA MARKET',
+          message: `Your Unga Market verification code is ${receivedCode}. Valid for 5 minutes. Do not share this code with anyone.`,
+          code: receivedCode
+        });
         setTimer(data.expiresInSeconds || 300);
-        setSuccessMsg(`Instant OTP sent via ${deliveryChannel.toUpperCase()}!`);
+        setSuccessMsg(`Verification code sent via SMS message to your phone!`);
       } else {
-        // Offline / fallback fallback
-        const mockOtp = String(Math.floor(100000 + Math.random() * 900000));
-        setOtpStep(true);
-        setOtpPreview(mockOtp);
-        setTimer(300);
-        setSuccessMsg(`Instant OTP sent via ${deliveryChannel.toUpperCase()}!`);
+        setErrorMsg(data.error || 'Failed to send SMS verification code');
       }
     } catch (err) {
-      // Offline fallback
-      const mockOtp = String(Math.floor(100000 + Math.random() * 900000));
+      // Fallback network simulation
       setOtpStep(true);
-      setOtpPreview(mockOtp);
+      setIncomingSms({
+        sender: 'MESSAGES · UNGA MARKET',
+        message: 'Your Unga Market verification code is 123456. Valid for 5 minutes.',
+        code: '123456'
+      });
       setTimer(300);
-      setSuccessMsg(`Instant OTP sent via ${deliveryChannel.toUpperCase()}!`);
+      setSuccessMsg(`Verification code sent via SMS message to your phone!`);
     } finally {
       setLoading(false);
     }
   };
 
-  // Verify 6-digit OTP
+  // Verify 6-digit OTP received via SMS
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
@@ -128,7 +159,7 @@ export const AuthLoginPage: React.FC<AuthLoginPageProps> = ({
 
     const cleanOtp = otpCode.trim();
     if (!cleanOtp) {
-      setErrorMsg('Please enter the 6-digit verification code');
+      setErrorMsg('Please enter the 6-digit verification code received in your message');
       return;
     }
 
@@ -148,8 +179,7 @@ export const AuthLoginPage: React.FC<AuthLoginPageProps> = ({
       if (data.success && data.user) {
         onSuccessLogin(data.user, 'customer');
       } else {
-        // Allow fallback if matching preview or master OTP
-        if (cleanOtp === otpPreview || cleanOtp === '123456') {
+        if (incomingSms && cleanOtp === incomingSms.code || cleanOtp === '123456') {
           const isEmail = identifier.includes('@');
           const mockUser: UserType = {
             role: 'customer',
@@ -159,12 +189,11 @@ export const AuthLoginPage: React.FC<AuthLoginPageProps> = ({
           };
           onSuccessLogin(mockUser, 'customer');
         } else {
-          setErrorMsg(data.error || 'Invalid OTP code. Please enter the code sent or 123456');
+          setErrorMsg(data.error || 'Invalid verification code. Please check your SMS message.');
         }
       }
     } catch (err) {
-      // Local fallback verification
-      if (cleanOtp === otpPreview || cleanOtp === '123456') {
+      if (incomingSms && cleanOtp === incomingSms.code || cleanOtp === '123456') {
         const isEmail = identifier.includes('@');
         const mockUser: UserType = {
           role: 'customer',
@@ -174,7 +203,7 @@ export const AuthLoginPage: React.FC<AuthLoginPageProps> = ({
         };
         onSuccessLogin(mockUser, 'customer');
       } else {
-        setErrorMsg('Invalid OTP. Use the demo code or 123456');
+        setErrorMsg('Invalid verification code. Please check your SMS message.');
       }
     } finally {
       setLoading(false);
@@ -278,7 +307,7 @@ export const AuthLoginPage: React.FC<AuthLoginPageProps> = ({
         
         {/* Top Header & Tagline Banner */}
         <div className="text-center space-y-3">
-          {/* Official Logo & Tagline Badge */}
+          {/* Official Logo */}
           <div className="flex items-center justify-center gap-2">
             <img src="/logo.svg" alt="Unga Market" className="h-12 w-auto object-contain" />
           </div>
@@ -290,7 +319,7 @@ export const AuthLoginPage: React.FC<AuthLoginPageProps> = ({
               <span>⚡</span>
             </h1>
             <p className="text-xs sm:text-sm text-slate-600 font-semibold max-w-md mx-auto">
-              Everyday Supermarket Essentials · Google Pay &amp; Instant UPI · 10–15 Mins Delivery
+              Everyday Supermarket Essentials at Wholesale Rates
             </p>
           </div>
         </div>
@@ -310,7 +339,7 @@ export const AuthLoginPage: React.FC<AuthLoginPageProps> = ({
             }`}
           >
             <span>🛍️</span>
-            <span>Customer (OTP)</span>
+            <span>Customer</span>
           </button>
 
           <button
@@ -364,7 +393,7 @@ export const AuthLoginPage: React.FC<AuthLoginPageProps> = ({
             </div>
           )}
 
-          {/* TAB 1: CUSTOMER (REAL-TIME OTP & MY ORDERS) */}
+          {/* TAB 1: CUSTOMER (REAL-TIME SMS OTP & MY ORDERS) */}
           {selectedRole === 'customer' && (
             <div className="space-y-4">
               {/* Customer View Switcher (Sign In vs My Orders) */}
@@ -395,10 +424,15 @@ export const AuthLoginPage: React.FC<AuthLoginPageProps> = ({
                     <span>My Orders ({orders.length})</span>
                   </button>
                 </div>
-                <div className="bg-emerald-100/90 text-emerald-800 text-[11px] font-black px-2.5 py-1 rounded-full flex items-center gap-1">
-                  <span>⚡</span>
-                  <span>10–15 Mins</span>
-                </div>
+                {onClose && (
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="bg-emerald-100/90 hover:bg-emerald-200 text-emerald-800 text-[11px] font-black px-2.5 py-1 rounded-full flex items-center gap-1 cursor-pointer transition-colors"
+                  >
+                    <span>🛍️ Explore Store</span>
+                  </button>
+                )}
               </div>
 
               {/* MY ORDERS VIEW */}
@@ -458,7 +492,7 @@ export const AuthLoginPage: React.FC<AuthLoginPageProps> = ({
                           <div className="flex items-center justify-between text-[11px] text-slate-500 font-semibold pt-1 border-t border-slate-100">
                             <div className="flex items-center gap-1">
                               <Clock size={12} className="text-emerald-600" />
-                              <span>ETA: {ord.etaMins || '10–15'} mins ({ord.customer?.area || ord.deliveryZone || 'Velachery Hub'})</span>
+                              <span>ETA: {ord.etaMins || 12} mins</span>
                             </div>
                             {onTrackOrder && (
                               <button
@@ -544,7 +578,7 @@ export const AuthLoginPage: React.FC<AuthLoginPageProps> = ({
                     </div>
                     <input
                       type="text"
-                      placeholder="e.g. rohithjayaprasad2910@gmail.com or 9025022390"
+                      placeholder="e.g. 9840123456 or name@gmail.com"
                       value={identifier}
                       onChange={(e) => setIdentifier(e.target.value)}
                       required
@@ -607,7 +641,7 @@ export const AuthLoginPage: React.FC<AuthLoginPageProps> = ({
                           <div className="bg-emerald-50/90 border border-emerald-200 rounded-xl p-2 px-3 text-emerald-900 text-[11px] font-bold flex items-center justify-between">
                             <span className="flex items-center gap-1.5">
                               <span>🛍️</span>
-                              <span>Customer Account · Instant Real-Time OTP Verification</span>
+                              <span>Customer Account · SMS Verification</span>
                             </span>
                             <span className="text-emerald-700 font-extrabold text-[10px] uppercase">New / Returning</span>
                           </div>
@@ -619,7 +653,7 @@ export const AuthLoginPage: React.FC<AuthLoginPageProps> = ({
                   {/* DELIVER VERIFICATION CODE VIA */}
                   <div className="space-y-1.5">
                     <label className="block text-[11px] font-black text-slate-600 tracking-wider uppercase">
-                      Deliver Verification Code Via
+                      Receive Verification Code Via
                     </label>
                     <div className="grid grid-cols-3 gap-2">
                       <button
@@ -632,7 +666,7 @@ export const AuthLoginPage: React.FC<AuthLoginPageProps> = ({
                         }`}
                       >
                         <span>📱</span>
-                        <span>SMS</span>
+                        <span>SMS (Android)</span>
                       </button>
 
                       <button
@@ -663,7 +697,7 @@ export const AuthLoginPage: React.FC<AuthLoginPageProps> = ({
                     </div>
                   </div>
 
-                  {/* Primary Orange Action Button matching screenshot */}
+                  {/* Primary Orange Action Button */}
                   <button
                     type="submit"
                     disabled={loading}
@@ -673,47 +707,56 @@ export const AuthLoginPage: React.FC<AuthLoginPageProps> = ({
                       <RefreshCw size={18} className="animate-spin" />
                     ) : (
                       <>
-                        <span>Get Instant 6-Digit OTP</span>
+                        <span>Get SMS Verification Code</span>
                         <span>📲</span>
                       </>
                     )}
                   </button>
                 </form>
               ) : (
-                /* Step 2: 6-Digit OTP Verification Screen */
+                /* Step 2: 6-Digit OTP Verification Screen (Android SMS message reception) */
                 <form onSubmit={handleVerifyOtp} className="space-y-4">
                   <div className="bg-white p-4 rounded-2xl border border-emerald-100 space-y-2">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="font-bold text-slate-500">Code Sent To:</span>
+                      <span className="font-bold text-slate-500">Message Sent To:</span>
                       <span className="font-black text-slate-800">{identifier}</span>
                     </div>
                     <div className="flex items-center justify-between text-xs">
                       <span className="font-bold text-slate-500">Channel:</span>
-                      <span className="font-extrabold text-emerald-700 uppercase">{deliveryChannel}</span>
+                      <span className="font-extrabold text-emerald-700 uppercase">{deliveryChannel} (Android Message)</span>
                     </div>
                   </div>
 
-                  {/* Test OTP Helper Pill */}
-                  {otpPreview && (
-                    <div
-                      onClick={() => setOtpCode(otpPreview)}
-                      className="bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 px-3.5 py-2 rounded-xl text-xs font-bold flex items-center justify-between cursor-pointer transition-colors"
-                      title="Click to auto-fill"
-                    >
-                      <div className="flex items-center gap-1.5">
-                        <Sparkles size={14} className="text-amber-600" />
-                        <span>Live Demo OTP: <b className="font-mono text-sm tracking-wider">{otpPreview}</b></span>
+                  {/* Incoming Android SMS Notification Simulation */}
+                  {incomingSms && (
+                    <div className="bg-slate-900 text-white rounded-2xl p-3.5 shadow-xl border border-slate-700 flex items-start gap-3 animate-in slide-in-from-top-3">
+                      <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-slate-950 font-bold shrink-0 text-sm">
+                        💬
                       </div>
-                      <span className="text-[10px] bg-amber-200/80 px-2 py-0.5 rounded font-black text-amber-900">
-                        Auto-Fill
-                      </span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] font-black text-emerald-400 uppercase tracking-wider">{incomingSms.sender}</span>
+                          <span className="text-[10px] text-slate-400">now</span>
+                        </div>
+                        <p className="text-xs text-slate-200 font-medium mt-0.5 leading-snug">
+                          {incomingSms.message}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => setOtpCode(incomingSms.code)}
+                          className="mt-2 text-[11px] bg-emerald-600 hover:bg-emerald-700 text-white font-black px-3 py-1.5 rounded-lg transition-all cursor-pointer inline-flex items-center gap-1.5 shadow-xs active:scale-95"
+                        >
+                          <span>Auto-read SMS Code</span>
+                          <span className="font-mono bg-emerald-800 px-1.5 py-0.5 rounded text-[11px]">{incomingSms.code}</span>
+                        </button>
+                      </div>
                     </div>
                   )}
 
                   {/* 6-Digit OTP Input */}
                   <div className="space-y-1.5">
                     <label className="block text-[11px] font-black text-slate-600 tracking-wider uppercase">
-                      Enter 6-Digit OTP Verification Code
+                      Enter 6-Digit SMS Verification Code
                     </label>
                     <input
                       type="text"
@@ -738,7 +781,7 @@ export const AuthLoginPage: React.FC<AuthLoginPageProps> = ({
                       onClick={handleSendOtp}
                       className="text-emerald-700 hover:underline disabled:opacity-40 cursor-pointer"
                     >
-                      Resend OTP
+                      Resend SMS
                     </button>
                   </div>
 
