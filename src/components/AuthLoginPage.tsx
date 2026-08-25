@@ -29,6 +29,14 @@ export const AuthLoginPage: React.FC<AuthLoginPageProps> = ({
   const [identifier, setIdentifier] = useState('');
   const [deliveryChannel, setDeliveryChannel] = useState<'sms' | 'whatsapp' | 'gmail'>('sms');
   
+  // Predefined role registries
+  const PREDEFINED_SHOP_OWNERS = ['rohithjayaprasad2910@gmail.com', 'orders@ungamarket.com', 'admin@ungamarket.com', 'owner@ungamarket.com'];
+  const PREDEFINED_DELIVERY_PARTNERS = ['delivery@ungamarket.com', 'rider@ungamarket.com', 'fleet@ungamarket.com', '9876500112'];
+
+  const cleanCurrentId = identifier.trim().toLowerCase();
+  const isPredefinedShopOwner = PREDEFINED_SHOP_OWNERS.includes(cleanCurrentId);
+  const isPredefinedDelivery = PREDEFINED_DELIVERY_PARTNERS.includes(cleanCurrentId);
+
   // OTP Verification State
   const [otpStep, setOtpStep] = useState(false);
   const [otpCode, setOtpCode] = useState('');
@@ -39,7 +47,7 @@ export const AuthLoginPage: React.FC<AuthLoginPageProps> = ({
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   // Shop Owner Form State
-  const [ownerEmail, setOwnerEmail] = useState('orders@ungamarket.com');
+  const [ownerEmail, setOwnerEmail] = useState('rohithjayaprasad2910@gmail.com');
   const [ownerPin, setOwnerPin] = useState('1234');
 
   // Delivery Partner Form State
@@ -528,17 +536,84 @@ export const AuthLoginPage: React.FC<AuthLoginPageProps> = ({
 
                   {/* 10-DIGIT MOBILE NUMBER OR GMAIL */}
                   <div className="space-y-1.5">
-                    <label className="block text-[11px] font-black text-slate-600 tracking-wider uppercase">
-                      10-Digit Mobile Number or Gmail
-                    </label>
+                    <div className="flex items-center justify-between">
+                      <label className="block text-[11px] font-black text-slate-600 tracking-wider uppercase">
+                        10-Digit Mobile Number or Gmail
+                      </label>
+                      <span className="text-[10px] text-emerald-700 font-bold">Auto Role Detection</span>
+                    </div>
                     <input
                       type="text"
-                      placeholder="e.g. 9025022390 or name@gmail.com"
+                      placeholder="e.g. rohithjayaprasad2910@gmail.com or 9025022390"
                       value={identifier}
                       onChange={(e) => setIdentifier(e.target.value)}
                       required
                       className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all"
                     />
+
+                    {/* Dynamic Role Recognition Banner */}
+                    {cleanCurrentId.length > 3 && (
+                      <div className="pt-1">
+                        {isPredefinedShopOwner ? (
+                          <div className="bg-amber-50 border border-amber-300 rounded-xl p-3 text-amber-900 text-xs space-y-2">
+                            <div className="flex items-center justify-between font-black">
+                              <span className="flex items-center gap-1.5">
+                                <span>👑</span>
+                                <span>Predefined Shop Owner Account Recognized</span>
+                              </span>
+                              <span className="bg-amber-200 text-amber-950 px-2 py-0.5 rounded text-[10px] font-extrabold uppercase">
+                                Shop Owner
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-amber-800 font-medium">
+                              <b>{cleanCurrentId}</b> is authorized as Shop Owner with direct store management access.
+                            </p>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setOwnerEmail(cleanCurrentId);
+                                setSelectedRole('shopowner');
+                              }}
+                              className="w-full bg-amber-600 hover:bg-amber-700 text-white font-extrabold py-2 px-3 rounded-lg text-xs transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                            >
+                              <span>Switch to Shop Owner Login (PIN: 1234)</span>
+                              <ArrowRight size={13} />
+                            </button>
+                          </div>
+                        ) : isPredefinedDelivery ? (
+                          <div className="bg-blue-50 border border-blue-300 rounded-xl p-3 text-blue-900 text-xs space-y-2">
+                            <div className="flex items-center justify-between font-black">
+                              <span className="flex items-center gap-1.5">
+                                <span>🛵</span>
+                                <span>Predefined Delivery Partner Recognized</span>
+                              </span>
+                              <span className="bg-blue-200 text-blue-950 px-2 py-0.5 rounded text-[10px] font-extrabold uppercase">
+                                Fleet Rider
+                              </span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setDriverPhone(cleanCurrentId);
+                                setSelectedRole('delivery');
+                              }}
+                              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-extrabold py-2 px-3 rounded-lg text-xs transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                            >
+                              <span>Switch to Delivery Partner Login (PIN: 1234)</span>
+                              <ArrowRight size={13} />
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="bg-emerald-50/90 border border-emerald-200 rounded-xl p-2 px-3 text-emerald-900 text-[11px] font-bold flex items-center justify-between">
+                            <span className="flex items-center gap-1.5">
+                              <span>🛍️</span>
+                              <span>Customer Account · Instant Real-Time OTP Verification</span>
+                            </span>
+                            <span className="text-emerald-700 font-extrabold text-[10px] uppercase">New / Returning</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   {/* DELIVER VERIFICATION CODE VIA */}
@@ -715,16 +790,39 @@ export const AuthLoginPage: React.FC<AuthLoginPageProps> = ({
               </div>
 
               <div className="space-y-1.5">
-                <label className="block text-[11px] font-black text-slate-600 tracking-wider uppercase">
-                  Store Email or Mobile Number
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="block text-[11px] font-black text-slate-600 tracking-wider uppercase">
+                    Store Email or Mobile Number
+                  </label>
+                  <span className="text-[10px] text-emerald-700 font-bold">Authorized Account</span>
+                </div>
                 <input
                   type="text"
                   value={ownerEmail}
                   onChange={(e) => setOwnerEmail(e.target.value)}
                   required
+                  placeholder="rohithjayaprasad2910@gmail.com"
                   className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold text-slate-800 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                 />
+                
+                {/* Predefined Quick Selectors */}
+                <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                  <span className="text-[10px] text-slate-400 font-bold">Quick Select:</span>
+                  <button
+                    type="button"
+                    onClick={() => setOwnerEmail('rohithjayaprasad2910@gmail.com')}
+                    className="text-[10px] bg-emerald-100 hover:bg-emerald-200 text-emerald-900 font-bold px-2 py-0.5 rounded cursor-pointer transition-colors"
+                  >
+                    rohithjayaprasad2910@gmail.com (Shopowner)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setOwnerEmail('orders@ungamarket.com')}
+                    className="text-[10px] bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold px-2 py-0.5 rounded cursor-pointer transition-colors"
+                  >
+                    orders@ungamarket.com
+                  </button>
+                </div>
               </div>
 
               <div className="space-y-1.5">
@@ -776,16 +874,39 @@ export const AuthLoginPage: React.FC<AuthLoginPageProps> = ({
               </div>
 
               <div className="space-y-1.5">
-                <label className="block text-[11px] font-black text-slate-600 tracking-wider uppercase">
-                  Rider Registered Phone
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="block text-[11px] font-black text-slate-600 tracking-wider uppercase">
+                    Rider Registered Phone or Email
+                  </label>
+                  <span className="text-[10px] text-blue-700 font-bold">Fleet Access</span>
+                </div>
                 <input
                   type="text"
                   value={driverPhone}
                   onChange={(e) => setDriverPhone(e.target.value)}
                   required
+                  placeholder="9876500112 or delivery@ungamarket.com"
                   className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold text-slate-800 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                 />
+
+                {/* Predefined Quick Selectors */}
+                <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                  <span className="text-[10px] text-slate-400 font-bold">Quick Select:</span>
+                  <button
+                    type="button"
+                    onClick={() => setDriverPhone('9876500112')}
+                    className="text-[10px] bg-blue-100 hover:bg-blue-200 text-blue-900 font-bold px-2 py-0.5 rounded cursor-pointer transition-colors"
+                  >
+                    9876500112 (Fleet Rider)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDriverPhone('delivery@ungamarket.com')}
+                    className="text-[10px] bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold px-2 py-0.5 rounded cursor-pointer transition-colors"
+                  >
+                    delivery@ungamarket.com
+                  </button>
+                </div>
               </div>
 
               <div className="space-y-1.5">

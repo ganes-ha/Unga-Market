@@ -457,20 +457,43 @@ app.post('/api/generate-product-image', async (req, res) => {
   }
 });
 
+// Predefined Shop Owner & Delivery Partner Email/Identifier Registry
+const PREDEFINED_SHOP_OWNERS = [
+  'rohithjayaprasad2910@gmail.com',
+  'orders@ungamarket.com',
+  'admin@ungamarket.com',
+  'owner@ungamarket.com'
+];
+
+const PREDEFINED_DELIVERY_PARTNERS = [
+  'delivery@ungamarket.com',
+  'rider@ungamarket.com',
+  'fleet@ungamarket.com',
+  '9876500112'
+];
+
 // Role-based auth endpoint
 app.post('/api/auth/login', (req, res) => {
   const { role, identifier, password, name, phone } = req.body;
+  const cleanId = String(identifier || '').trim().toLowerCase();
+
+  // Automatic role determination if not explicitly specified
+  const isShopOwnerEmail = PREDEFINED_SHOP_OWNERS.includes(cleanId);
+  const isDeliveryEmail = PREDEFINED_DELIVERY_PARTNERS.includes(cleanId);
+
+  const determinedRole = role || (isShopOwnerEmail ? 'shopowner' : (isDeliveryEmail ? 'delivery' : 'customer'));
   
-  if (role === 'shopowner') {
-    // Shop Owner validation against configured PIN
+  if (determinedRole === 'shopowner' || isShopOwnerEmail) {
+    // Shop Owner validation against configured PIN (default: 1234)
     const validPin = shopOwnerPaymentSettings.storePin || '1234';
     if (password === validPin || password === '1234' || password === 'admin' || !password) {
+      const ownerName = cleanId === 'rohithjayaprasad2910@gmail.com' ? 'Rohith Jayaprasad (Shop Owner)' : (name || 'Shop Owner (Admin)');
       return res.json({
         success: true,
         user: {
           role: 'shopowner',
-          name: name || 'Shop Owner (Admin)',
-          email: identifier || shopOwnerPaymentSettings.storeEmail || 'orders@ungamarket.com',
+          name: ownerName,
+          email: cleanId || shopOwnerPaymentSettings.storeEmail || 'rohithjayaprasad2910@gmail.com',
           phone: phone || shopOwnerPaymentSettings.gpayPhone || '9840000001',
           store: 'Unga Market Wholesale Hub - Chennai'
         }
@@ -480,15 +503,15 @@ app.post('/api/auth/login', (req, res) => {
     }
   }
 
-  if (role === 'delivery') {
+  if (determinedRole === 'delivery' || isDeliveryEmail) {
     // Delivery Partner validation
     if (password === '1234' || password === 'delivery' || !password) {
       return res.json({
         success: true,
         user: {
           role: 'delivery',
-          name: name || 'Murugan V. (Fleet)',
-          email: identifier || 'delivery@ungamarket.com',
+          name: name || 'Murugan V. (Fleet Rider)',
+          email: cleanId || 'delivery@ungamarket.com',
           phone: phone || '9876500112',
           vehicle: 'TN-07-CS-4421',
           zone: 'South Zone / Velachery Hub'
@@ -499,14 +522,14 @@ app.post('/api/auth/login', (req, res) => {
     }
   }
 
-  // Customer Login
+  // If new login is not in the predefined set, they are the Customer
   res.json({
     success: true,
     user: {
       role: 'customer',
       name: name || 'Valued Customer',
-      email: identifier || 'customer@gmail.com',
-      phone: phone || identifier || '9876543210'
+      email: cleanId.includes('@') ? cleanId : (req.body.email || ''),
+      phone: !cleanId.includes('@') ? cleanId : (phone || '9876543210')
     }
   });
 });
@@ -576,17 +599,41 @@ app.post('/api/auth/verify-otp', (req, res) => {
     activeOtps.delete(cleanId);
 
     const isEmail = cleanId.includes('@');
-    const customerUser = {
-      role: 'customer',
-      name: name || (record ? record.name : 'Valued Customer'),
-      email: isEmail ? cleanId : (req.body.email || ''),
-      phone: !isEmail ? cleanId : (req.body.phone || '9876543210')
-    };
+    const lowerId = cleanId.toLowerCase();
+    const isShopOwner = PREDEFINED_SHOP_OWNERS.includes(lowerId);
+    const isDelivery = PREDEFINED_DELIVERY_PARTNERS.includes(lowerId);
+
+    let userObj;
+    if (isShopOwner) {
+      userObj = {
+        role: 'shopowner',
+        name: lowerId === 'rohithjayaprasad2910@gmail.com' ? 'Rohith Jayaprasad (Shop Owner)' : 'Shop Owner (Admin)',
+        email: cleanId,
+        phone: req.body.phone || '9840000001',
+        store: 'Unga Market Wholesale Hub - Chennai'
+      };
+    } else if (isDelivery) {
+      userObj = {
+        role: 'delivery',
+        name: 'Murugan V. (Fleet Rider)',
+        email: cleanId,
+        phone: req.body.phone || '9876500112',
+        vehicle: 'TN-07-CS-4421',
+        zone: 'South Zone / Velachery Hub'
+      };
+    } else {
+      userObj = {
+        role: 'customer',
+        name: name || (record ? record.name : 'Valued Customer'),
+        email: isEmail ? cleanId : (req.body.email || ''),
+        phone: !isEmail ? cleanId : (req.body.phone || '9876543210')
+      };
+    }
 
     res.json({
       success: true,
       message: 'OTP verified successfully! Welcome to Unga Market.',
-      user: customerUser
+      user: userObj
     });
   } catch (err) {
     console.error('Error verifying OTP:', err);
